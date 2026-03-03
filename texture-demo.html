@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Textures in Three.js</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080f;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#8b5cf6;--accent2:#38bdf8;--accent3:#f97316;--accent4:#34d399;--text:#e8eaf0;--dim:#7a7f96;--code-bg:rgba(0,0,0,0.5);--mono:'Space Mono',monospace;--display:'Syne',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--display);line-height:1.7}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(139,92,246,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.02) 1px,transparent 1px);background-size:60px 60px}
+
+.hero{position:relative;padding:70px 40px 30px;text-align:center;z-index:1}
+.hero-badge{display:inline-block;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:24px}
+.hero h1{font-size:clamp(34px,6vw,58px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:16px}
+.hero h1 .purple{color:var(--accent)}
+.hero h1 .blue{color:var(--accent2)}
+.hero p{font-size:16px;color:var(--dim);max-width:580px;margin:0 auto 12px;line-height:1.8}
+.hero-sub{font-family:var(--mono);font-size:11px;color:#3f4460;letter-spacing:1px}
+
+.nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:0 40px 40px;z-index:1;position:relative}
+.nav a{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s;letter-spacing:0.5px}
+.nav a:hover,.nav a.active{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:var(--accent)}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.lesson{margin-bottom:50px}
+.lesson-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.lesson-num{font-family:var(--mono);font-size:12px;color:var(--accent);background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);padding:4px 10px;border-radius:6px;white-space:nowrap;margin-top:5px}
+.lesson-title{font-size:clamp(20px,3vw,30px);font-weight:800;letter-spacing:-1px;line-height:1.1}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 26px;margin-bottom:16px;backdrop-filter:blur(8px)}
+.card p{font-size:15px;color:#c5cad8;line-height:1.85}
+.card strong{color:var(--accent);font-weight:700}
+.card .blue{color:var(--accent2)}
+.card .orange{color:var(--accent3)}
+
+.analogy{background:rgba(56,189,248,0.06);border-left:3px solid var(--accent2);padding:12px 18px;border-radius:0 10px 10px 0;margin:12px 0;font-size:14px;color:#a5c8e8;font-style:italic}
+.blender-note{background:rgba(139,92,246,0.06);border-left:3px solid var(--accent);padding:10px 16px;border-radius:0 10px 10px 0;margin:12px 0 0;font-size:13px;color:#b8a5e8;font-style:italic}
+
+.code-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.code-label{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.cbtn{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:5px;cursor:pointer;transition:all 0.2s}
+.cbtn:hover{color:var(--accent);border-color:rgba(139,92,246,0.3)}
+.cbtn.ok{border-color:#4ade80;color:#4ade80;background:rgba(74,222,128,0.1)}
+
+pre{background:var(--code-bg);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.85;color:var(--text);margin-bottom:16px;white-space:pre}
+code{font-family:inherit}
+.kw{color:#c792ea}.st{color:#c3e88d}.nm{color:#f78c6c}.cm{color:#546e7a;font-style:italic}.fn{color:#82aaff}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.two>div{min-width:0}
+.two pre{max-height:420px;overflow-y:auto}
+@media(max-width:850px){.two{grid-template-columns:1fr}.two .canvas-side{order:-1}.hero{padding:50px 20px 20px}.nav{padding:0 16px 24px}.wrap{padding:0 14px}pre{font-size:11px;padding:14px}}
+
+.cbox{border-radius:16px;overflow:hidden;border:1px solid var(--border);position:relative;background:#0d0d18}
+.cbox canvas{width:100%!important;height:350px!important;display:block}
+.clabel{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:5px;letter-spacing:1px;text-transform:uppercase;z-index:10}
+.cnote{font-size:12px;color:var(--dim);margin-top:8px;font-style:italic}
+
+.ctrl{margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.ctrl label{color:var(--dim);font-size:11px;font-family:var(--mono);white-space:nowrap}
+.ctrl input[type="range"]{width:70px;accent-color:var(--accent)}
+.ctrl select{background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px;font-family:var(--mono)}
+.ctrl .vv{color:var(--dim);font-family:var(--mono);font-size:11px;min-width:28px}
+
+.shape-grid{display:flex;flex-wrap:wrap;gap:4px}
+.shape-btn{padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:10px;font-family:var(--mono);cursor:pointer;transition:all 0.15s}
+.shape-btn:hover,.shape-btn.active{border-color:var(--accent);color:var(--text);background:rgba(139,92,246,0.12)}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:40px 0}
+
+.part-div{max-width:1100px;margin:30px auto 20px;padding:0 24px}
+.part-inner{border:1px solid var(--border);border-radius:12px;padding:20px 24px;text-align:center;background:linear-gradient(135deg,rgba(139,92,246,0.06),transparent)}
+.part-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:3px;color:var(--accent);margin-bottom:4px}
+.part-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.part-desc{color:var(--dim);font-size:14px}
+
+.dl-btn{display:inline-block;padding:10px 24px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:var(--accent);font-family:var(--mono);font-size:13px;border-radius:8px;cursor:pointer;transition:all 0.2s;margin-top:6px}
+.dl-btn:hover{background:rgba(139,92,246,0.3);border-color:var(--accent);color:#fff}
+.dl-btn.dl-blue{background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.4);color:var(--accent2)}
+.dl-btn.dl-blue:hover{background:rgba(56,189,248,0.3);border-color:var(--accent2);color:#fff}
+.dl-btn.ok{background:rgba(74,222,128,0.15);border-color:#4ade80;color:#4ade80}
+
+footer{text-align:center;padding:36px 24px;color:var(--dim);font-family:var(--mono);font-size:11px;border-top:1px solid var(--border);margin-top:50px;position:relative;z-index:1}
+
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-badge">Week 7 &middot; Extra</div>
+  <h1>Image <span class="purple">Textures</span> in Three.js</h1>
+  <p>Two ways to put colour on a shape &mdash; load an image file, or paint one with code. Both use the same material system you already know.</p>
+  <div class="hero-sub">Part 1: Image File &middot; Part 2: Canvas Code &middot; Compare</div>
+</div>
+
+<!-- ══ NAV ══ -->
+<div class="nav">
+  <a href="#s1">01 Load</a>
+  <a href="#s2">02 UV Mapping</a>
+  <a href="#s3">03 Canvas</a>
+  <a href="#s4">04 Compare</a>
+  <a href="../../threejs-journey.html">← Journey</a>
+</div>
+
+<!-- ══ PART 1 ══ -->
+<div class="part-div">
+  <div class="part-inner">
+    <div class="part-label">Part 1</div>
+    <div class="part-title">Load an Image</div>
+    <div class="part-desc">Use TextureLoader to load a PNG and wrap it around a 3D shape.</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ── 01 LOAD ── -->
+<div class="lesson" id="s1">
+  <div class="lesson-head"><span class="lesson-num">01</span><h2 class="lesson-title">Load an Image Texture</h2></div>
+
+  <div class="card">
+    <p>In Blender you drag an image into the Shader Editor. In Three.js you use <strong>TextureLoader</strong> &mdash; same idea, different tool.</p>
+    <p style="margin-top:10px"><strong>TextureLoader</strong> reads a PNG/JPG file &rarr; creates a <strong>Texture</strong> object &rarr; you pass it to a material's <code>map</code> property &rarr; Three.js wraps the image around the geometry using <strong>UV coordinates</strong>.</p>
+    <div class="blender-note">This is the same as connecting an Image Texture node to the Base Color input of Principled BSDF. The <code>map</code> property IS the Base Color texture slot.</div>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Load &amp; apply a texture</span>
+        <button class="cbtn" onclick="copyEl(this)">Copy</button>
+      </div>
+<pre id="code-1"><span class="cm">// 1. Create a texture loader</span>
+<span class="kw">const</span> loader = <span class="kw">new</span> THREE.TextureLoader();
+
+<span class="cm">// 2. Load the image file</span>
+<span class="kw">const</span> texture = loader.load(<span class="st">"Week2A_grid.png"</span>);
+
+<span class="cm">// 3. Use it as the material's map</span>
+<span class="kw">const</span> material = <span class="kw">new</span> THREE.MeshStandardMaterial({
+  map: texture
+});
+
+<span class="cm">// 4. Create a mesh — texture wraps</span>
+<span class="cm">//    around the shape automatically</span>
+<span class="kw">const</span> mesh = <span class="kw">new</span> THREE.Mesh(
+  <span class="kw">new</span> THREE.PlaneGeometry(<span class="nm">2</span>, <span class="nm">2</span>),
+  material
+);
+scene.add(mesh);</pre>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c1"></canvas><span class="clabel">Image texture</span></div>
+      <div class="cnote">Drag to orbit. The rainbow stripes are the loaded Week2A_grid.png image.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="analogy">Four lines: create loader &rarr; load image &rarr; assign to <code>map</code> &rarr; make mesh. The texture wraps around the geometry automatically using its UV coordinates.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 02 UV MAPPING ── -->
+<div class="lesson" id="s2">
+  <div class="lesson-head"><span class="lesson-num">02</span><h2 class="lesson-title">UV Mapping in Action</h2></div>
+
+  <div class="card">
+    <p>Different shapes wrap the same texture in different ways. A <strong>Plane</strong> shows it flat. A <strong>Box</strong> repeats it on each face. A <strong>Sphere</strong> stretches at the poles. This is <strong>UV mapping</strong> &mdash; the same concept as in Blender.</p>
+    <div class="blender-note">In Blender you see UVs in the UV Editor. Three.js geometries have UVs built in &mdash; they're generated automatically when you create the shape.</div>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Same texture, different shape</span>
+        <button class="cbtn" onclick="copyEl(this)">Copy</button>
+      </div>
+<pre id="code-2"><span class="cm">// The texture stays the same</span>
+<span class="kw">const</span> texture = loader.load(<span class="st">"Week2A_grid.png"</span>);
+<span class="kw">const</span> mat = <span class="kw">new</span> THREE.MeshStandardMaterial({
+  map: texture
+});
+
+<span class="cm">// Only the geometry changes</span>
+<span class="kw">const</span> mesh = <span class="kw">new</span> THREE.Mesh(
+  <span class="cm">// Try each of these:</span>
+  <span class="kw">new</span> THREE.PlaneGeometry(<span class="nm">1.6</span>, <span class="nm">1.6</span>),
+  <span class="cm">// new THREE.BoxGeometry(1.2, 1.2, 1.2),</span>
+  <span class="cm">// new THREE.SphereGeometry(0.8, 48, 48),</span>
+  <span class="cm">// new THREE.CylinderGeometry(0.6,0.6,1.2,48),</span>
+  <span class="cm">// new THREE.TorusGeometry(0.6, 0.25, 32, 64),</span>
+  <span class="cm">// new THREE.ConeGeometry(0.7, 1.2, 48),</span>
+  mat
+);
+scene.add(mesh);</pre>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c2"></canvas><span class="clabel">UV mapping</span></div>
+      <div class="ctrl">
+        <label>Shape</label>
+        <div class="shape-grid">
+          <button class="shape-btn active" data-s2="plane">Plane</button>
+          <button class="shape-btn" data-s2="box">Box</button>
+          <button class="shape-btn" data-s2="sphere">Sphere</button>
+          <button class="shape-btn" data-s2="cylinder">Cylinder</button>
+          <button class="shape-btn" data-s2="torus">Torus</button>
+          <button class="shape-btn" data-s2="cone">Cone</button>
+        </div>
+      </div>
+      <div class="cnote">Click each shape. Notice how the rainbow stripes wrap differently.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="divider" style="max-width:1100px;margin:40px auto"></div>
+
+<!-- ══ PART 2 ══ -->
+<div class="part-div">
+  <div class="part-inner" style="background:linear-gradient(135deg,rgba(56,189,248,0.06),transparent)">
+    <div class="part-label" style="color:var(--accent2)">Part 2</div>
+    <div class="part-title">Create with Code</div>
+    <div class="part-desc">Draw a texture using the HTML Canvas API &mdash; no image file needed.</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ── 03 CANVAS TEXTURE ── -->
+<div class="lesson" id="s3">
+  <div class="lesson-head"><span class="lesson-num" style="color:var(--accent2);background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25)">03</span><h2 class="lesson-title">Canvas Texture</h2></div>
+
+  <div class="card">
+    <p>Instead of loading a file, you <strong class="blue">draw</strong> a texture with JavaScript. Create a hidden HTML canvas, draw on it with the Canvas 2D API, then wrap it in a <strong class="blue">CanvasTexture</strong>.</p>
+    <p style="margin-top:10px">The material doesn't care where the texture came from &mdash; a PNG file or JavaScript code. Both produce a Texture that goes into the <code>map</code> slot.</p>
+    <div class="analogy">Why bother? Canvas textures are dynamic &mdash; change colours on the fly, respond to user input, generate patterns from data. No image file to manage or load.</div>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Draw a texture with code</span>
+        <button class="cbtn" onclick="copyEl(this)">Copy</button>
+      </div>
+<pre id="code-3"><span class="cm">// 1. Create a hidden canvas</span>
+<span class="kw">const</span> cv = document.createElement(<span class="st">"canvas"</span>);
+cv.width = <span class="nm">512</span>;
+cv.height = <span class="nm">512</span>;
+<span class="kw">const</span> ctx = cv.getContext(<span class="st">"2d"</span>);
+
+<span class="cm">// 2. Draw rainbow stripes</span>
+<span class="kw">const</span> colors = [
+  <span class="st">"#ff0000"</span>, <span class="st">"#ff9900"</span>, <span class="st">"#ffff00"</span>,
+  <span class="st">"#00ff00"</span>, <span class="st">"#0000ff"</span>,
+  <span class="st">"#4b0082"</span>, <span class="st">"#8b00ff"</span>
+];
+<span class="kw">const</span> h = cv.height / colors.length;
+colors.forEach((col, i) =&gt; {
+  ctx.fillStyle = col;
+  ctx.fillRect(<span class="nm">0</span>, i * h, cv.width, h);
+});
+
+<span class="cm">// 3. Turn it into a Three.js texture</span>
+<span class="kw">const</span> texture = <span class="kw">new</span> THREE.CanvasTexture(cv);
+
+<span class="cm">// 4. Use it exactly like an image texture</span>
+<span class="kw">const</span> material = <span class="kw">new</span> THREE.MeshStandardMaterial({
+  map: texture
+});</pre>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c3"></canvas><span class="clabel">Canvas texture</span></div>
+      <div class="ctrl">
+        <label>Shape</label>
+        <select id="c3-shape">
+          <option value="plane">Plane</option>
+          <option value="box">Box</option>
+          <option value="sphere">Sphere</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="torus">Torus</option>
+        </select>
+        <label>Stripes</label>
+        <input type="range" id="c3-stripes" min="2" max="20" step="1" value="7">
+        <span class="vv" id="c3-stripes-v">7</span>
+        <label>Blend</label>
+        <select id="c3-blend">
+          <option value="sharp">Sharp</option>
+          <option value="gradient">Gradient</option>
+        </select>
+      </div>
+      <div class="cnote">Change the stripe count or add gradient blending &mdash; the texture updates live.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="blender-note">Blender parallel: <strong>Image Texture</strong> node = TextureLoader. <strong>Procedural textures</strong> (Noise, Checker, Gradient) = CanvasTexture. Both generated by code, not from a file.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 04 COMPARE ── -->
+<div class="lesson" id="s4">
+  <div class="lesson-head"><span class="lesson-num" style="color:var(--accent4);background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.25)">04</span><h2 class="lesson-title">Side by Side</h2></div>
+
+  <div class="card">
+    <p>Left: image file loaded with TextureLoader. Right: drawn with Canvas code. Both produce the same visual result on identical geometry.</p>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="cbox"><canvas id="c4a"></canvas><span class="clabel">Image file</span></div>
+    </div>
+    <div>
+      <div class="cbox"><canvas id="c4b"></canvas><span class="clabel">Canvas code</span></div>
+    </div>
+  </div>
+  <div class="ctrl" style="max-width:400px;margin:0 auto 16px">
+    <label>Shape</label>
+    <div class="shape-grid">
+      <button class="shape-btn active" data-cmp="plane">Plane</button>
+      <button class="shape-btn" data-cmp="box">Box</button>
+      <button class="shape-btn" data-cmp="sphere">Sphere</button>
+      <button class="shape-btn" data-cmp="cylinder">Cylinder</button>
+      <button class="shape-btn" data-cmp="torus">Torus</button>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <p><strong>Image Texture</strong></p>
+      <p style="font-size:14px">&bull; Photos, hand-painted art<br>&bull; Complex patterns<br>&bull; PBR maps (normal, roughness)<br>&bull; Assets from Blender / Photoshop</p>
+    </div>
+    <div class="card">
+      <p><strong class="blue">Canvas Texture</strong></p>
+      <p style="font-size:14px">&bull; Simple patterns &amp; gradients<br>&bull; Dynamic / data-driven visuals<br>&bull; Text labels on 3D objects<br>&bull; No external files to manage</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── DOWNLOAD ── -->
+<div class="lesson" id="full">
+  <div class="lesson-head"><span class="lesson-num">+</span><h2 class="lesson-title">Download &amp; Try</h2></div>
+
+  <div class="card">
+    <p>Download a ready-to-run HTML file. Each one shows a textured plane &mdash; open it in your browser to see it working.</p>
+  </div>
+
+  <div class="two">
+    <div class="card" style="text-align:center">
+      <p><strong>Image Texture</strong></p>
+      <p style="font-size:14px;margin:8px 0">Pick any image from your computer and see it on a 3D plane.</p>
+      <button class="dl-btn" id="dl-image">Download image-texture.html</button>
+      <p style="font-size:12px;color:var(--dim);margin-top:8px">Has an upload button &mdash; works anywhere, no server needed.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <p><strong class="blue">Canvas Texture</strong></p>
+      <p style="font-size:14px;margin:8px 0">Generates rainbow stripes with code &mdash; no image file needed.</p>
+      <button class="dl-btn dl-blue" id="dl-canvas">Download canvas-texture.html</button>
+      <p style="font-size:12px;color:var(--dim);margin-top:8px">Self-contained &mdash; works anywhere.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>
+  Textures in Three.js &mdash; 4E Virtual Design
+</footer>
+
+<!-- ══ THREE.JS ══ -->
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ── helpers ── */
+function mkDemo(id, opts) {
+  var c = document.getElementById(id);
+  if (!c) return null;
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a2e);
+  var w = c.clientWidth || 400, h = c.clientHeight || 350;
+  var cam = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
+  cam.position.set(opts && opts.cx || 2, opts && opts.cy || 1.5, opts && opts.cz || 3);
+  cam.lookAt(0, 0, 0);
+  var r = new THREE.WebGLRenderer({ canvas: c, antialias: true });
+  r.setSize(w, h);
+  r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  var sun = new THREE.DirectionalLight(0xffffff, 0.8);
+  sun.position.set(5, 5, 5);
+  scene.add(sun);
+  var ctrl = new OrbitControls(cam, c);
+  ctrl.enableDamping = true;
+  ctrl.enableZoom = false;
+  return { scene: scene, cam: cam, r: r, c: c, ctrl: ctrl };
+}
+
+function makeGeo(type) {
+  switch (type) {
+    case 'box':      return new THREE.BoxGeometry(1.2, 1.2, 1.2);
+    case 'sphere':   return new THREE.SphereGeometry(0.8, 48, 48);
+    case 'cylinder': return new THREE.CylinderGeometry(0.6, 0.6, 1.2, 48);
+    case 'torus':    return new THREE.TorusGeometry(0.6, 0.25, 32, 64);
+    case 'cone':     return new THREE.ConeGeometry(0.7, 1.2, 48);
+    case 'plane':    return new THREE.PlaneGeometry(1.6, 1.6);
+    default:         return new THREE.BoxGeometry(1.2, 1.2, 1.2);
+  }
+}
+
+function makeRainbowCanvas(stripeCount, blend) {
+  var cv = document.createElement('canvas');
+  cv.width = 512; cv.height = 512;
+  var ctx = cv.getContext('2d');
+  var base = ['#ff0000','#ff9900','#ffff00','#00ff00','#0000ff','#4b0082','#8b00ff'];
+  var colors = [];
+  for (var i = 0; i < stripeCount; i++) colors.push(base[i % base.length]);
+  var h = cv.height / colors.length;
+  if (blend === 'gradient') {
+    var grad = ctx.createLinearGradient(0, 0, 0, cv.height);
+    colors.forEach(function(col, i) {
+      grad.addColorStop(i / colors.length, col);
+    });
+    grad.addColorStop(1, colors[colors.length - 1]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, cv.width, cv.height);
+  } else {
+    colors.forEach(function(col, i) {
+      ctx.fillStyle = col;
+      ctx.fillRect(0, i * h, cv.width, h);
+    });
+  }
+  return cv;
+}
+
+/* ═══════════════════════════════════════ */
+/*  01 — Image Texture                    */
+/* ═══════════════════════════════════════ */
+(function() {
+  var d = mkDemo('c1');
+  if (!d) return;
+  var texture = new THREE.TextureLoader().load('Week2A_grid.png');
+  var mat = new THREE.MeshStandardMaterial({ map: texture });
+  var mesh = new THREE.Mesh(makeGeo('plane'), mat);
+  d.scene.add(mesh);
+
+  (function anim() {
+    requestAnimationFrame(anim);
+    d.ctrl.update();
+    d.r.render(d.scene, d.cam);
+  })();
+})();
+
+/* ═══════════════════════════════════════ */
+/*  02 — UV Mapping                        */
+/* ═══════════════════════════════════════ */
+(function() {
+  var d = mkDemo('c2');
+  if (!d) return;
+  var texture = new THREE.TextureLoader().load('Week2A_grid.png');
+  var mat = new THREE.MeshStandardMaterial({ map: texture });
+  var mesh = new THREE.Mesh(makeGeo('plane'), mat);
+  d.scene.add(mesh);
+
+  document.querySelectorAll('[data-s2]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-s2]').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      d.scene.remove(mesh);
+      mesh = new THREE.Mesh(makeGeo(btn.dataset.s2), mat);
+      d.scene.add(mesh);
+    });
+  });
+
+  (function anim() {
+    requestAnimationFrame(anim);
+    d.ctrl.update();
+    d.r.render(d.scene, d.cam);
+  })();
+})();
+
+/* ═══════════════════════════════════════ */
+/*  03 — Canvas Texture                    */
+/* ═══════════════════════════════════════ */
+(function() {
+  var d = mkDemo('c3');
+  if (!d) return;
+  var cvTex = new THREE.CanvasTexture(makeRainbowCanvas(7, 'sharp'));
+  var mat = new THREE.MeshStandardMaterial({ map: cvTex });
+  var mesh = new THREE.Mesh(makeGeo('plane'), mat);
+  d.scene.add(mesh);
+
+  function rebuildTex() {
+    var n = parseInt(document.getElementById('c3-stripes').value);
+    var b = document.getElementById('c3-blend').value;
+    document.getElementById('c3-stripes-v').textContent = n;
+    cvTex.dispose();
+    cvTex = new THREE.CanvasTexture(makeRainbowCanvas(n, b));
+    mat.map = cvTex;
+    mat.needsUpdate = true;
+  }
+
+  document.getElementById('c3-shape').addEventListener('change', function(e) {
+    d.scene.remove(mesh);
+    mesh = new THREE.Mesh(makeGeo(e.target.value), mat);
+    d.scene.add(mesh);
+  });
+  document.getElementById('c3-stripes').addEventListener('input', rebuildTex);
+  document.getElementById('c3-blend').addEventListener('change', rebuildTex);
+
+  (function anim() {
+    requestAnimationFrame(anim);
+    d.ctrl.update();
+    d.r.render(d.scene, d.cam);
+  })();
+})();
+
+/* ═══════════════════════════════════════ */
+/*  04 — Side by Side                      */
+/* ═══════════════════════════════════════ */
+(function() {
+  var dA = mkDemo('c4a', { cx: 1.8, cy: 1.2, cz: 2.2 });
+  var dB = mkDemo('c4b', { cx: 1.8, cy: 1.2, cz: 2.2 });
+  if (!dA || !dB) return;
+
+  var imgTex = new THREE.TextureLoader().load('Week2A_grid.png');
+  var imgMat = new THREE.MeshStandardMaterial({ map: imgTex });
+  var imgMesh = new THREE.Mesh(makeGeo('plane'), imgMat);
+  dA.scene.add(imgMesh);
+
+  var cvTex = new THREE.CanvasTexture(makeRainbowCanvas(7, 'sharp'));
+  var cvMat = new THREE.MeshStandardMaterial({ map: cvTex });
+  var cvMesh = new THREE.Mesh(makeGeo('plane'), cvMat);
+  dB.scene.add(cvMesh);
+
+  document.querySelectorAll('[data-cmp]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-cmp]').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var type = btn.dataset.cmp;
+      dA.scene.remove(imgMesh);
+      imgMesh = new THREE.Mesh(makeGeo(type), imgMat);
+      dA.scene.add(imgMesh);
+      dB.scene.remove(cvMesh);
+      cvMesh = new THREE.Mesh(makeGeo(type), cvMat);
+      dB.scene.add(cvMesh);
+    });
+  });
+
+  (function anim() {
+    requestAnimationFrame(anim);
+    dA.ctrl.update();
+    dB.ctrl.update();
+    dA.r.render(dA.scene, dA.cam);
+    dB.r.render(dB.scene, dB.cam);
+  })();
+})();
+
+
+
+</script>
+
+<script>
+(function() {
+  /* copy helper */
+  window.copyEl = function(btn) {
+    var pre = btn.closest('.lesson, .wrap') ? btn.parentElement.nextElementSibling : null;
+    if (!pre) pre = btn.closest('.code-head').nextElementSibling;
+    if (!pre || pre.tagName !== 'PRE') return;
+    navigator.clipboard.writeText(pre.textContent).then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('ok');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1500);
+    });
+  };
+
+  /* download helpers */
+  var S = 'scr' + 'ipt';
+  var HEAD = '\x3c!DOCTYPE html>\n\x3chtml>\x3chead>\n\x3cstyle>body{margin:0;overflow:hidden;background:#111}\x3c/style>\n\x3c/head>\x3cbody>\n\x3ccanvas id="c">\x3c/canvas>\n\x3c' + S + ' type="importmap">\n{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}\n\x3c/' + S + '>\n\x3c' + S + ' type="module">\nimport * as THREE from "three";\nimport {OrbitControls} from "three/addons/controls/OrbitControls.js";\nconst canvas=document.getElementById("c");\nconst scene=new THREE.Scene();\nscene.background=new THREE.Color(0x1a1a2e);\nconst camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,100);\ncamera.position.set(0,1.5,4);\nconst renderer=new THREE.WebGLRenderer({canvas,antialias:true});\nrenderer.setSize(innerWidth,innerHeight);\nrenderer.setPixelRatio(Math.min(devicePixelRatio,2));\nscene.add(new THREE.AmbientLight(0xffffff,0.4));\nconst sun=new THREE.DirectionalLight(0xffffff,0.8);\nsun.position.set(5,5,5);\nscene.add(sun);\n';
+
+  var TAIL = '\nconst controls=new OrbitControls(camera,canvas);\ncontrols.enableDamping=true;\nfunction animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}\nanimate();\nwindow.addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});\n\x3c/' + S + '>\n\x3c/body>\x3c/html>';
+
+  var imageHead = '\x3c!DOCTYPE html>\n\x3chtml>\x3chead>\n\x3cstyle>body{margin:0;overflow:hidden;background:#111}\n#pick{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10;padding:12px 24px;font-size:16px;border:2px dashed #888;border-radius:8px;background:rgba(0,0,0,0.7);color:#fff;cursor:pointer}\n#pick:hover{border-color:#fff}\x3c/style>\n\x3c/head>\x3cbody>\n\x3cinput type="file" id="pick" accept="image/*" value="Choose an image">\n\x3ccanvas id="c">\x3c/canvas>\n\x3c' + S + ' type="importmap">\n{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}\n\x3c/' + S + '>\n\x3c' + S + ' type="module">\nimport * as THREE from "three";\nimport {OrbitControls} from "three/addons/controls/OrbitControls.js";\nconst canvas=document.getElementById("c");\nconst scene=new THREE.Scene();\nscene.background=new THREE.Color(0x1a1a2e);\nconst camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,100);\ncamera.position.set(0,1.5,4);\nconst renderer=new THREE.WebGLRenderer({canvas,antialias:true});\nrenderer.setSize(innerWidth,innerHeight);\nrenderer.setPixelRatio(Math.min(devicePixelRatio,2));\nscene.add(new THREE.AmbientLight(0xffffff,0.4));\nconst sun=new THREE.DirectionalLight(0xffffff,0.8);\nsun.position.set(5,5,5);\nscene.add(sun);\n';
+
+  var imageCode = '// Create a plane ready for a texture\nconst plane=new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshStandardMaterial());\nscene.add(plane);\n\n// When the user picks an image, load it as a texture\ndocument.getElementById("pick").addEventListener("change",function(e){\n  const file=e.target.files[0];\n  if(!file)return;\n  const reader=new FileReader();\n  reader.onload=function(){\n    const img=new Image();\n    img.onload=function(){\n      const texture=new THREE.Texture(img);\n      texture.needsUpdate=true;\n      plane.material.map=texture;\n      plane.material.needsUpdate=true;\n    };\n    img.src=reader.result;\n  };\n  reader.readAsDataURL(file);\n});\n';
+
+  var canvasCode = '// Draw rainbow stripes with code - no image file needed\nconst cv=document.createElement("canvas");\ncv.width=512;cv.height=512;\nconst ctx=cv.getContext("2d");\nconst colors=["#ff0000","#ff9900","#ffff00","#00ff00","#0000ff","#4b0082","#8b00ff"];\nconst h=cv.height/colors.length;\ncolors.forEach((col,i)=>{ctx.fillStyle=col;ctx.fillRect(0,i*h,cv.width,h);});\nconst texture=new THREE.CanvasTexture(cv);\nconst plane=new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshStandardMaterial({map:texture}));\nscene.add(plane);\n';
+
+  function dl(name, code) {
+    var html = HEAD + code + TAIL;
+    var blob = new Blob([html], {type: 'application/octet-stream'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+  }
+
+  document.getElementById('dl-image').addEventListener('click', function() {
+    var html = imageHead + imageCode + TAIL;
+    var blob = new Blob([html], {type: 'application/octet-stream'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'image-texture.html';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+    this.textContent = 'Downloaded!';
+    this.classList.add('ok');
+    var self = this;
+    setTimeout(function() { self.textContent = 'Download image-texture.html'; self.classList.remove('ok'); }, 1500);
+  });
+
+  document.getElementById('dl-canvas').addEventListener('click', function() {
+    dl('canvas-texture.html', canvasCode);
+    this.textContent = 'Downloaded!';
+    this.classList.add('ok');
+    var self = this;
+    setTimeout(function() { self.textContent = 'Download canvas-texture.html'; self.classList.remove('ok'); }, 1500);
+  });
+
+
+})();
+</script>
+</body>
+</html>
