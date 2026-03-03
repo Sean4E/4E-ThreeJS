@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML & Three.js — Terminology Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080f;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#8b5cf6;--accent2:#38bdf8;--accent3:#f97316;--accent4:#34d399;--text:#e8eaf0;--dim:#7a7f96;--code-bg:rgba(0,0,0,0.5);--mono:'Space Mono',monospace;--display:'Syne',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--display);line-height:1.7}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(139,92,246,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.02) 1px,transparent 1px);background-size:60px 60px}
+.hero{position:relative;padding:70px 40px 30px;text-align:center;z-index:1}
+.hero-badge{display:inline-block;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:24px}
+.hero h1{font-size:clamp(32px,6vw,64px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:16px}
+.hero h1 .purple{color:var(--accent)}.hero h1 .cyan{color:var(--accent2)}
+.hero p{font-size:16px;color:var(--dim);max-width:600px;margin:0 auto 12px;line-height:1.8}
+.hero-sub{font-family:var(--mono);font-size:11px;color:#3f4460;letter-spacing:1px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:0 40px 40px;z-index:1;position:relative}
+.nav a{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s;letter-spacing:0.5px}
+.nav a:hover{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:var(--accent)}
+.nav-div{width:100%;text-align:center;font-family:var(--mono);font-size:10px;color:#2a2d3a;letter-spacing:2px;padding:4px 0}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.part-div{max-width:1100px;margin:30px auto 20px;padding:0 24px}
+.part-inner{border:1px solid var(--border);border-radius:12px;padding:20px 24px;text-align:center;background:linear-gradient(135deg,rgba(139,92,246,0.06),transparent)}
+.part-inner.cyan{background:linear-gradient(135deg,rgba(56,189,248,0.06),transparent);border-color:rgba(56,189,248,0.12)}
+.part-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:3px;color:var(--accent);margin-bottom:4px}
+.part-inner.cyan .part-label{color:var(--accent2)}
+.part-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.part-desc{color:var(--dim);font-size:14px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:40px 0}
+.section{margin-bottom:50px}
+.section-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.section-num{font-family:var(--mono);font-size:12px;color:var(--accent);background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);padding:4px 10px;border-radius:6px;white-space:nowrap;margin-top:5px}
+.section-num.blue{color:var(--accent2);background:rgba(56,189,248,0.1);border-color:rgba(56,189,248,0.25)}
+.section-num.orange{color:var(--accent3);background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.25)}
+.section-num.green{color:var(--accent4);background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25)}
+.section-title{font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-1px;line-height:1.1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 26px;margin-bottom:12px;backdrop-filter:blur(8px)}
+.card p{font-size:15px;color:#c5cad8;line-height:1.85}
+.card strong{color:var(--accent);font-weight:700}
+.term-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:720px){.term-grid{grid-template-columns:1fr}}
+.term-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px)}
+.term-card .term-name{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:6px;letter-spacing:0.5px}
+.term-card .term-name.blue{color:var(--accent2)}
+.term-card .term-name.orange{color:var(--accent3)}
+.term-card .term-name.green{color:var(--accent4)}
+.term-card p{font-size:13.5px;color:#b0b5c8;line-height:1.75}
+.term-card p strong{color:var(--text);font-weight:600}
+.analogy{background:rgba(56,189,248,0.06);border-left:3px solid var(--accent2);padding:12px 18px;border-radius:0 10px 10px 0;margin:12px 0;font-size:14px;color:#a5c8e8;font-style:italic}
+.note{background:rgba(139,92,246,0.06);border-left:3px solid var(--accent);padding:10px 16px;border-radius:0 10px 10px 0;margin:12px 0;font-size:13px;color:#b8a5e8}
+.warn{background:rgba(249,115,22,0.06);border-left:3px solid var(--accent3);padding:10px 16px;border-radius:0 10px 10px 0;margin:12px 0;font-size:13px;color:#e8c4a5}
+.tip{background:rgba(52,211,153,0.06);border-left:3px solid var(--accent4);padding:10px 16px;border-radius:0 10px 10px 0;margin:12px 0;font-size:13px;color:#a5e8c8}
+.code-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.code-label{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.cbtn{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:5px;cursor:pointer;transition:all 0.2s}
+.cbtn:hover{color:var(--accent);border-color:rgba(139,92,246,0.3)}
+.cbtn.ok{border-color:#4ade80;color:#4ade80;background:rgba(74,222,128,0.1)}
+pre{background:var(--code-bg);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.85;color:var(--text);margin-bottom:12px;white-space:pre}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tag{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;letter-spacing:0.5px}
+.tag.html{background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);color:var(--accent3)}
+.tag.js{background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);color:var(--accent)}
+.tag.three{background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.25);color:var(--accent2)}
+.kw{color:#c792ea}.st{color:#c3e88d}.nm{color:#f78c6c}.cm{color:#546e7a;font-style:italic}.at{color:#89ddff}.tg{color:#f07178}
+footer{text-align:center;padding:36px 24px;color:var(--dim);font-family:var(--mono);font-size:11px;border-top:1px solid var(--border);margin-top:50px;position:relative;z-index:1}
+@media(max-width:850px){.hero{padding:50px 20px 20px}.nav{padding:0 16px 24px}.wrap{padding:0 14px}pre{font-size:11px;padding:14px}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-badge">Reference Guide</div>
+  <h1>HTML <span class="purple">&amp;</span> <span class="cyan">Three.js</span><br>Terminology</h1>
+  <p>Every element, object and concept — named correctly, explained briefly. A plain-language lookup for the whole stack.</p>
+  <div class="hero-sub">Part 1: HTML Document &middot; Part 2: Three.js Core &middot; Part 3: The Render Loop</div>
+</div>
+<nav class="nav">
+  <div class="nav-div">&#x2014; HTML &#x2014;</div>
+  <a href="#doctype">DOCTYPE</a><a href="#document">Document Tags</a><a href="#head">Head &amp; Meta</a><a href="#script">Script &amp; Link</a><a href="#canvas">Canvas</a>
+  <div class="nav-div">&#x2014; THREE.JS &#x2014;</div>
+  <a href="#scene">Scene</a><a href="#camera">Camera</a><a href="#renderer">Renderer</a><a href="#geometry">Geometry</a><a href="#material">Material</a><a href="#mesh">Mesh</a><a href="#lights">Lights</a><a href="#transforms">Transforms</a><a href="#loop">Render Loop</a><a href="#controls">Controls</a><a href="#extras">Extras &amp; Template</a>
+</nav>
+
+<div class="part-div"><div class="part-inner"><div class="part-label">Part 1</div><div class="part-title">The HTML Document</div><div class="part-desc">The wrapper the browser reads before running any JavaScript or Three.js code.</div></div></div>
+
+<div class="wrap">
+
+<div class="section" id="doctype">
+  <div class="section-head"><div class="section-num orange">DOCTYPE</div><div class="section-title">Document Type Declaration</div></div>
+  <div class="card"><div class="tag-row"><span class="tag html">HTML</span><span class="tag html">Required — Line 1</span></div><p>The very first line of every HTML file. It is <strong>not a tag</strong> — it is an instruction to the browser: &quot;parse this file as modern HTML5.&quot; Without it, some browsers fall into <em>Quirks Mode</em> and render things incorrectly.</p></div>
+  <pre><span class="cm">&lt;!-- Always the very first line, no whitespace before it --&gt;</span>
+<span class="tg">&lt;!DOCTYPE html&gt;</span></pre>
+  <div class="warn">&#9888; Not an element — no closing tag, no attributes to change. Leave it exactly as shown.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="document">
+  <div class="section-head"><div class="section-num orange">STRUCTURE</div><div class="section-title">Document Tags — html, head, body</div></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name orange">&lt;html lang="en"&gt;</div><p>The <strong>root element</strong>. Everything lives inside it. The <code>lang</code> attribute declares the language for screen readers and search engines.</p></div>
+    <div class="term-card"><div class="term-name orange">&lt;head&gt;</div><p>Contains <strong>metadata</strong> — information about the page the browser uses but doesn't display. Title, fonts, styles, and importmaps go here.</p></div>
+    <div class="term-card"><div class="term-name orange">&lt;body&gt;</div><p>Everything the user <strong>sees and interacts with</strong>. Your canvas, divs, buttons, and module scripts all live inside here.</p></div>
+    <div class="term-card"><div class="term-name orange">Nesting</div><p>Tags must be properly <strong>nested</strong> — a child tag must close before its parent closes. <code>&lt;div&gt;&lt;p&gt;text&lt;/p&gt;&lt;/div&gt;</code> &#10003; — never overlap tags.</p></div>
+  </div>
+  <pre><span class="tg">&lt;!DOCTYPE html&gt;
+&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;
+  &lt;head&gt;</span><span class="cm"> &lt;!-- metadata --&gt;</span><span class="tg">&lt;/head&gt;
+  &lt;body&gt;</span><span class="cm"> &lt;!-- visible content --&gt;</span><span class="tg">&lt;/body&gt;
+&lt;/html&gt;</span></pre>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="head">
+  <div class="section-head"><div class="section-num orange">HEAD</div><div class="section-title">Meta Tags &amp; Title</div></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name orange">&lt;meta charset="UTF-8"&gt;</div><p>Sets the <strong>character encoding</strong>. UTF-8 supports every language and emoji. Without it, accented characters may render as garbage.</p></div>
+    <div class="term-card"><div class="term-name orange">&lt;meta name="viewport"&gt;</div><p>Controls <strong>mobile scaling</strong>. <code>width=device-width</code> matches the physical screen. <code>initial-scale=1.0</code> disables automatic zoom.</p></div>
+    <div class="term-card"><div class="term-name orange">&lt;title&gt;</div><p>Text shown in the <strong>browser tab</strong>, used by bookmarks and search engines. One per page, always inside <code>&lt;head&gt;</code>.</p></div>
+    <div class="term-card"><div class="term-name orange">Void Elements</div><p>Meta tags are <strong>void elements</strong> — no content, no closing tag. Same applies to <code>&lt;link&gt;</code>, <code>&lt;br&gt;</code>, <code>&lt;img&gt;</code>, and <code>&lt;input&gt;</code>.</p></div>
+  </div>
+  <pre><span class="tg">&lt;head&gt;
+  &lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;
+  &lt;meta</span> <span class="at">name</span>=<span class="st">"viewport"</span> <span class="at">content</span>=<span class="st">"width=device-width, initial-scale=1.0"</span><span class="tg">&gt;
+  &lt;title&gt;</span>My Three.js Scene<span class="tg">&lt;/title&gt;
+&lt;/head&gt;</span></pre>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="script">
+  <div class="section-head"><div class="section-num orange">LOADING</div><div class="section-title">&lt;script&gt;, &lt;link&gt; and importmap</div></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name orange">&lt;script src="..."&gt;</div><p>Loads an <strong>external JavaScript file</strong> or library. Used to bring in Three.js from a CDN. Place at the bottom of <code>&lt;body&gt;</code> so HTML loads first.</p></div>
+    <div class="term-card"><div class="term-name orange">type="module"</div><p>Marks the script as an <strong>ES Module</strong>, enabling <code>import / export</code> syntax. Required for modern Three.js. Execution is automatically deferred.</p></div>
+    <div class="term-card"><div class="term-name orange">defer / async</div><p><code>defer</code> — load in background, <strong>run after HTML is parsed</strong>. <code>async</code> — run as soon as ready, order not guaranteed. Use <code>defer</code> for Three.js.</p></div>
+    <div class="term-card"><div class="term-name orange">&lt;link rel="stylesheet"&gt;</div><p>Loads an <strong>external CSS file</strong> or Google Font. Lives in <code>&lt;head&gt;</code>. The <code>rel</code> attribute names the relationship of the resource.</p></div>
+    <div class="term-card"><div class="term-name orange">importmap</div><p>A <code>&lt;script type="importmap"&gt;</code> block that maps <strong>bare module names</strong> to CDN URLs — lets you write <code>import ... from 'three'</code> cleanly in the browser.</p></div>
+    <div class="term-card"><div class="term-name orange">CDN</div><p><strong>Content Delivery Network</strong> — a remote server hosting a library. No local install needed. <code>cdn.jsdelivr.net</code> is commonly used for Three.js.</p></div>
+  </div>
+  <pre><span class="tg">&lt;head&gt;
+  &lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://fonts.googleapis.com/..."</span><span class="tg">&gt;
+  &lt;script</span> <span class="at">type</span>=<span class="st">"importmap"</span><span class="tg">&gt;</span>
+    { <span class="st">"imports"</span>: {
+        <span class="st">"three"</span>: <span class="st">"https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js"</span>,
+        <span class="st">"three/addons/"</span>: <span class="st">"https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/"</span> }}
+  <span class="tg">&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+  <span class="kw">import</span> { OrbitControls } <span class="kw">from</span> <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+<span class="tg">&lt;/script&gt;&lt;/body&gt;</span></pre>
+  <div class="analogy">&#128161; A script tag is like plugging in a power tool — it does nothing until your code uses it. The CDN URL is just the cable.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="canvas">
+  <div class="section-head"><div class="section-num orange">CANVAS</div><div class="section-title">The &lt;canvas&gt; Element</div></div>
+  <div class="card"><div class="tag-row"><span class="tag html">HTML5</span><span class="tag three">Three.js render target</span></div><p>A rectangular <strong>pixel-drawing surface</strong> built into the browser. Blank by default — JavaScript draws into it. Three.js can create its own canvas automatically, or attach to one you place in the HTML.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name orange">width / height attributes</div><p>Sets the <strong>internal pixel resolution</strong>. Separate from CSS display size — a mismatch causes blurry output.</p></div>
+    <div class="term-card"><div class="term-name orange">id attribute</div><p>A unique name so JS can grab it with <code>document.getElementById('id')</code>. Pass to <code>WebGLRenderer</code> as the <code>canvas</code> option.</p></div>
+    <div class="term-card"><div class="term-name orange">renderer.domElement</div><p>The <strong>canvas Three.js created internally</strong>. A plain <code>&lt;canvas&gt;</code> you can style with CSS. Append with <code>document.body.appendChild()</code>.</p></div>
+    <div class="term-card"><div class="term-name orange">WebGL Context</div><p>The low-level GPU drawing API inside the canvas. Three.js wraps this entirely — you never call WebGL directly.</p></div>
+  </div>
+  <pre><span class="tg">&lt;canvas</span> <span class="at">id</span>=<span class="st">"scene"</span><span class="tg">&gt;&lt;/canvas&gt;
+&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="cm">// Option A — Three.js creates and appends its own canvas</span>
+  <span class="kw">const</span> renderer = <span class="kw">new</span> THREE.<span class="nm">WebGLRenderer</span>({ antialias: <span class="kw">true</span> });
+  document.body.appendChild(renderer.domElement);
+
+  <span class="cm">// Option B — attach to your existing canvas element</span>
+  <span class="kw">const</span> canvas = document.getElementById(<span class="st">'scene'</span>);
+  <span class="kw">const</span> r2     = <span class="kw">new</span> THREE.<span class="nm">WebGLRenderer</span>({ canvas });
+<span class="tg">&lt;/script&gt;</span></pre>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="part-div"><div class="part-inner cyan"><div class="part-label">Part 2</div><div class="part-title">Three.js Core Objects</div><div class="part-desc">The six objects every Three.js scene requires — and what each one actually does.</div></div></div>
+
+<div class="wrap">
+
+<div class="section" id="scene">
+  <div class="section-head"><div class="section-num blue">SCENE</div><div class="section-title">THREE.Scene</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.Scene</span><span class="tag js">Root Container</span></div><p>The <strong>root container</strong> for your entire 3D world. Objects, lights, cameras — everything must be added to the scene before it can be rendered.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">scene.add( object )</div><p>Places any <code>Object3D</code> (mesh, light, group) into the scene graph so it is drawn on the next render call.</p></div>
+    <div class="term-card"><div class="term-name blue">scene.remove( object )</div><p>Removes an object from the scene. It still exists in memory — just no longer rendered until added back.</p></div>
+    <div class="term-card"><div class="term-name blue">scene.background</div><p>Set to a <code>Color</code>, <code>Texture</code>, or <code>CubeTexture</code>. Default is <code>null</code> (transparent black).</p></div>
+    <div class="term-card"><div class="term-name blue">scene.fog</div><p><code>THREE.Fog(color, near, far)</code> adds distance haze. <code>FogExp2</code> gives exponential falloff.</p></div>
+  </div>
+  <pre><span class="kw">const</span> scene      = <span class="kw">new</span> THREE.<span class="nm">Scene</span>();
+scene.background = <span class="kw">new</span> THREE.<span class="nm">Color</span>(<span class="st">'#0a0a14'</span>);
+scene.fog        = <span class="kw">new</span> THREE.<span class="nm">Fog</span>(<span class="nm">0x0a0a14</span>, <span class="nm">10</span>, <span class="nm">50</span>);
+scene.add(mesh); scene.add(light);</pre>
+  <div class="analogy">&#127917; The Scene is the theatre building — it holds the stage, rigs and props. The camera is the audience looking in.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="camera">
+  <div class="section-head"><div class="section-num blue">CAMERA</div><div class="section-title">THREE.PerspectiveCamera</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.PerspectiveCamera</span><span class="tag three">THREE.OrthographicCamera</span></div><p>The <strong>eye</strong> looking into the scene. Nothing renders without one. <code>PerspectiveCamera</code> mimics human vision — distant objects appear smaller. <code>OrthographicCamera</code> has no perspective — parallel lines stay parallel (isometric / UI / blueprints).</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">fov — Field of View</div><p><strong>Vertical angle in degrees</strong> the camera sees. 50–75° looks natural. Lower = telephoto. Higher = wide-angle distortion.</p></div>
+    <div class="term-card"><div class="term-name blue">aspect</div><p><strong>Width-to-height ratio</strong> of the viewport. Almost always <code>innerWidth / innerHeight</code>. Must be updated on resize.</p></div>
+    <div class="term-card"><div class="term-name blue">near — Near Clip Plane</div><p>The <strong>closest visible distance</strong>. Anything nearer is clipped (invisible). Never set to 0 — use <code>0.1</code> as a safe default.</p></div>
+    <div class="term-card"><div class="term-name blue">far — Far Clip Plane</div><p>The <strong>farthest visible distance</strong>. Keep tight — enormous values reduce depth buffer precision and can cause Z-fighting.</p></div>
+    <div class="term-card"><div class="term-name blue">camera.position</div><p>A <code>Vector3</code>. Default is the origin (0,0,0) — which puts it inside any object placed there. Use <code>.position.set(x,y,z)</code>.</p></div>
+    <div class="term-card"><div class="term-name blue">camera.lookAt( target )</div><p>Points the camera at a <code>Vector3</code>. Call after positioning. OrbitControls replaces this automatically when active.</p></div>
+  </div>
+  <pre><span class="kw">const</span> camera = <span class="kw">new</span> THREE.<span class="nm">PerspectiveCamera</span>(
+  <span class="nm">60</span>,                                     <span class="cm">// fov</span>
+  window.innerWidth / window.innerHeight,  <span class="cm">// aspect</span>
+  <span class="nm">0.1</span>,                                    <span class="cm">// near</span>
+  <span class="nm">100</span>                                     <span class="cm">// far</span>
+);
+camera.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">5</span>);
+camera.lookAt(<span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">0</span>);</pre>
+  <div class="analogy">&#128247; PerspectiveCamera = a real lens with natural depth. OrthographicCamera = an architect's blueprint — no vanishing point.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="renderer">
+  <div class="section-head"><div class="section-num blue">RENDERER</div><div class="section-title">THREE.WebGLRenderer</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.WebGLRenderer</span><span class="tag js">GPU Bridge</span></div><p>The <strong>engine that draws the scene</strong>. Takes the scene and camera, uses the GPU via WebGL, and outputs pixels to the canvas. Without it, nothing appears.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">antialias: true</div><p>Smooths <strong>jagged staircase edges</strong> on geometry. Small GPU cost, visibly cleaner result. Set in the constructor options object.</p></div>
+    <div class="term-card"><div class="term-name blue">renderer.setSize(w, h)</div><p>Sets the <strong>output resolution</strong> of the canvas. Call once on setup and again in the resize listener.</p></div>
+    <div class="term-card"><div class="term-name blue">renderer.setPixelRatio()</div><p>Matches the device's <strong>pixel density</strong>. Use <code>Math.min(devicePixelRatio, 2)</code> to avoid over-rendering on Retina screens.</p></div>
+    <div class="term-card"><div class="term-name blue">renderer.render(scene, cam)</div><p>The <strong>actual draw call</strong>. Called every frame — takes a snapshot from the camera's viewpoint and paints it to the canvas.</p></div>
+    <div class="term-card"><div class="term-name blue">renderer.domElement</div><p>The <strong>canvas element</strong> Three.js created. Append to the page with <code>document.body.appendChild(renderer.domElement)</code>.</p></div>
+    <div class="term-card"><div class="term-name blue">renderer.shadowMap.enabled</div><p>Must be <code>true</code> to activate shadows. Lights and meshes also need <code>castShadow</code> / <code>receiveShadow</code> set individually.</p></div>
+  </div>
+  <pre><span class="kw">const</span> renderer = <span class="kw">new</span> THREE.<span class="nm">WebGLRenderer</span>({ antialias: <span class="kw">true</span> });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, <span class="nm">2</span>));
+renderer.shadowMap.enabled = <span class="kw">true</span>;
+document.body.appendChild(renderer.domElement);</pre>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="geometry">
+  <div class="section-head"><div class="section-num blue">GEOMETRY</div><div class="section-title">BufferGeometry — The Shape</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.BufferGeometry</span><span class="tag js">Shape Data / Vertices</span></div><p>Defines <strong>the shape</strong> of a 3D object — positions of every vertex, how they connect into triangles, and UV coordinates for textures. Carries no colour or shading — that belongs to the material.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">BoxGeometry(w, h, d)</div><p>A <strong>rectangular cuboid</strong>. Optional extra segment params allow finer shader deformation.</p></div>
+    <div class="term-card"><div class="term-name blue">SphereGeometry(r, wSeg, hSeg)</div><p>A <strong>sphere</strong>. Higher segment counts = rounder but more expensive to render.</p></div>
+    <div class="term-card"><div class="term-name blue">PlaneGeometry(w, h)</div><p>A flat <strong>rectangle</strong> in the XY plane. Rotate 90° on X (<code>Math.PI / 2</code>) to make a floor.</p></div>
+    <div class="term-card"><div class="term-name blue">CylinderGeometry(rTop, rBot, h)</div><p>A <strong>cylinder or cone</strong>. One radius to 0 makes a cone. Equal radii = perfect cylinder.</p></div>
+    <div class="term-card"><div class="term-name blue">TorusGeometry(r, tube, rSeg, tSeg)</div><p>A <strong>doughnut ring</strong>. <code>r</code> = ring radius, <code>tube</code> = cross-section thickness.</p></div>
+    <div class="term-card"><div class="term-name blue">Vertices &amp; Triangles</div><p>All geometry is made of triangles. <strong>Vertices</strong> are corner points. Three.js stores them in typed array <code>BufferAttribute</code>s on the GPU.</p></div>
+  </div>
+  <pre><span class="kw">const</span> box    = <span class="kw">new</span> THREE.<span class="nm">BoxGeometry</span>(<span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">1</span>);
+<span class="kw">const</span> sphere = <span class="kw">new</span> THREE.<span class="nm">SphereGeometry</span>(<span class="nm">0.5</span>, <span class="nm">32</span>, <span class="nm">16</span>);
+<span class="kw">const</span> plane  = <span class="kw">new</span> THREE.<span class="nm">PlaneGeometry</span>(<span class="nm">10</span>, <span class="nm">10</span>);
+<span class="kw">const</span> torus  = <span class="kw">new</span> THREE.<span class="nm">TorusGeometry</span>(<span class="nm">1</span>, <span class="nm">0.3</span>, <span class="nm">16</span>, <span class="nm">100</span>);
+<span class="cm">// Geometry = shape data only. Pair with a material to make a Mesh.</span></pre>
+  <div class="analogy">&#129230; Geometry is the wireframe armature — the shape without any surface quality. Paint comes from the material.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="material">
+  <div class="section-head"><div class="section-num blue">MATERIAL</div><div class="section-title">Material — The Surface</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.Material</span><span class="tag js">Colour / Shading / PBR</span></div><p>Defines <strong>how a surface looks</strong> — colour, shininess, transparency, and how it reacts to light. The same geometry looks completely different with different materials.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">MeshBasicMaterial</div><p><strong>No lighting.</strong> Always shows full colour regardless of lights in the scene. Wireframes, debug objects, always-visible glows.</p></div>
+    <div class="term-card"><div class="term-name blue">MeshStandardMaterial</div><p>The <strong>physically based (PBR)</strong> default. Reacts to lights realistically. Has <code>roughness</code> and <code>metalness</code>. Use for most objects.</p></div>
+    <div class="term-card"><div class="term-name blue">MeshPhysicalMaterial</div><p>Extended PBR with <code>clearcoat</code>, <code>transmission</code> (glass), and <code>iridescence</code>. More GPU-expensive than Standard.</p></div>
+    <div class="term-card"><div class="term-name blue">MeshNormalMaterial</div><p>Colours each face by its <strong>normal direction</strong>. No lights needed — invaluable for debugging geometry orientation.</p></div>
+    <div class="term-card"><div class="term-name blue">roughness / metalness</div><p><code>roughness 0</code> = mirror. <code>roughness 1</code> = chalk. <code>metalness 0</code> = plastic. <code>metalness 1</code> = polished metal.</p></div>
+    <div class="term-card"><div class="term-name blue">transparent / opacity</div><p>Set <code>transparent: true</code> then control <code>opacity</code> (0–1). Both required — opacity alone with no transparent flag will not work.</p></div>
+  </div>
+  <pre><span class="kw">const</span> mat = <span class="kw">new</span> THREE.<span class="nm">MeshStandardMaterial</span>({
+  color: <span class="nm">0x8b5cf6</span>, roughness: <span class="nm">0.3</span>, metalness: <span class="nm">0.6</span>
+});
+mat.color.set(<span class="st">'#38bdf8'</span>); <span class="cm">// change colour after creation</span>
+mat.wireframe = <span class="kw">true</span>;</pre>
+  <div class="tip">&#10003; MeshBasicMaterial — no lights needed. MeshStandardMaterial — needs at least one light or the object renders black.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="mesh">
+  <div class="section-head"><div class="section-num blue">MESH</div><div class="section-title">THREE.Mesh — The Complete Object</div></div>
+  <div class="card"><div class="tag-row"><span class="tag three">THREE.Mesh</span><span class="tag js">Geometry + Material combined</span></div><p>A <code>Mesh</code> is the <strong>complete renderable object</strong> — geometry (shape) plus material (surface) combined, placed into the scene. It inherits <code>position</code>, <code>rotation</code>, and <code>scale</code> from <code>Object3D</code>.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">Object3D (base class)</div><p>Base for all positionable things. Cameras, lights, groups and meshes all share <code>position</code>, <code>rotation</code>, <code>scale</code>, <code>name</code>, and <code>children</code>.</p></div>
+    <div class="term-card"><div class="term-name blue">mesh.name</div><p>String identifier. Find it later with <code>scene.getObjectByName('cube')</code>. Not required but very useful in complex scenes.</p></div>
+    <div class="term-card"><div class="term-name blue">mesh.visible</div><p>Boolean. <code>false</code> hides the mesh without removing it — it still exists in memory and the scene graph.</p></div>
+    <div class="term-card"><div class="term-name blue">castShadow / receiveShadow</div><p>Both must be <code>true</code> on relevant meshes, plus the renderer and light must have shadows enabled — all four required.</p></div>
+  </div>
+  <pre><span class="kw">const</span> cube = <span class="kw">new</span> THREE.<span class="nm">Mesh</span>(
+  <span class="kw">new</span> THREE.<span class="nm">BoxGeometry</span>(<span class="nm">1</span>,<span class="nm">1</span>,<span class="nm">1</span>),
+  <span class="kw">new</span> THREE.<span class="nm">MeshStandardMaterial</span>({ color: <span class="nm">0x8b5cf6</span> })
+);
+cube.name = <span class="st">'mainCube'</span>;
+cube.castShadow = <span class="kw">true</span>;
+scene.add(cube);
+
+<span class="cm">// Clean up GPU memory when removing</span>
+scene.remove(cube);
+cube.geometry.dispose();
+cube.material.dispose();</pre>
+  <div class="analogy">&#127922; Geometry = the cardboard shape. Material = the paint. Mesh = finished object — both combined, placed in the world.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="lights">
+  <div class="section-head"><div class="section-num blue">LIGHTS</div><div class="section-title">Lights — Illuminating the Scene</div></div>
+  <div class="card"><p>Required for physically-based materials to show colour and shading. <code>MeshBasicMaterial</code> ignores all lights. Every light must be <strong>added to the scene</strong> like any other object.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name blue">AmbientLight(color, intensity)</div><p><strong>No direction, no shadows.</strong> Flat brightness on every surface. Used to lift shadows — think room bounce light.</p></div>
+    <div class="term-card"><div class="term-name blue">DirectionalLight(color, intensity)</div><p>Parallel rays from one direction — like the <strong>sun</strong>. Position matters. Can cast sharp shadows.</p></div>
+    <div class="term-card"><div class="term-name blue">PointLight(color, intensity, dist)</div><p>Radiates in all directions from one point — like a <strong>light bulb</strong>. Has a <code>distance</code> falloff and <code>decay</code> param.</p></div>
+    <div class="term-card"><div class="term-name blue">SpotLight(color, intensity, dist, angle)</div><p>A <strong>cone of light</strong> with position and direction — like a stage spotlight. Most flexible shadow caster.</p></div>
+    <div class="term-card"><div class="term-name blue">HemisphereLight(sky, ground, intensity)</div><p>Two colours — one from above, one from below. Cheap natural-looking ambient fill. Cannot cast shadows.</p></div>
+    <div class="term-card"><div class="term-name blue">intensity</div><p>Brightness of the light. Default <code>1</code>. Values above 1 are valid. Newer Three.js uses real-world luminance units.</p></div>
+  </div>
+  <pre><span class="kw">const</span> ambient = <span class="kw">new</span> THREE.<span class="nm">AmbientLight</span>(<span class="nm">0xffffff</span>, <span class="nm">0.4</span>);
+scene.add(ambient);
+
+<span class="kw">const</span> sun = <span class="kw">new</span> THREE.<span class="nm">DirectionalLight</span>(<span class="nm">0xfff5cc</span>, <span class="nm">1.5</span>);
+sun.position.set(<span class="nm">5</span>, <span class="nm">10</span>, <span class="nm">5</span>);
+sun.castShadow = <span class="kw">true</span>;
+scene.add(sun);</pre>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="part-div"><div class="part-inner"><div class="part-label">Part 3</div><div class="part-title">Transforms, The Loop &amp; Extras</div><div class="part-desc">Positioning objects in space, animating them every frame, and utility tools that complete the toolkit.</div></div></div>
+
+<div class="wrap">
+
+<div class="section" id="transforms">
+  <div class="section-head"><div class="section-num">TRANSFORMS</div><div class="section-title">Position, Rotation &amp; Scale</div></div>
+  <div class="card"><p>Every <code>Object3D</code> has three transform properties controlling where it lives in 3D space. These are the <strong>most-used properties</strong> in any Three.js project.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name">position — Vector3</div><p>The object's location in world space. <code>position.set(x,y,z)</code> or set individual axes. Three.js uses a <strong>right-handed, Y-up</strong> coordinate system.</p></div>
+    <div class="term-card"><div class="term-name">rotation — Euler</div><p>Rotation in radians per axis. <code>Math.PI</code> = 180&#176;, <code>Math.PI / 2</code> = 90&#176;. Rotation order matters — default is <code>'XYZ'</code>.</p></div>
+    <div class="term-card"><div class="term-name">scale — Vector3</div><p>Scale multiplier per axis. Default <code>(1,1,1)</code>. <code>scale.setScalar(n)</code> for uniform scaling.</p></div>
+    <div class="term-card"><div class="term-name">Vector3</div><p>Represents a <strong>point or direction</strong> in 3D space (x, y, z). Used for positions, directions, distances — the most common Three.js utility type.</p></div>
+    <div class="term-card"><div class="term-name">Euler</div><p>Rotation as three angles in radians plus a rotation order string. Simpler to work with than Quaternions for everyday use.</p></div>
+    <div class="term-card"><div class="term-name">Quaternion</div><p>4-component rotation that avoids <strong>gimbal lock</strong>. Used internally by Three.js. Access via <code>mesh.quaternion</code>. Prefer Euler for manual entry.</p></div>
+  </div>
+  <pre><span class="cm">// Position</span>
+cube.position.set(<span class="nm">2</span>, <span class="nm">0.5</span>, -<span class="nm">1</span>);
+cube.position.x = <span class="nm">3</span>;
+
+<span class="cm">// Rotation — always in radians</span>
+cube.rotation.y    = Math.PI / <span class="nm">4</span>;  <span class="cm">// 45°</span>
+cube.rotation.set(<span class="nm">0</span>, Math.PI, <span class="nm">0</span>); <span class="cm">// 180° facing away</span>
+
+<span class="cm">// Scale</span>
+cube.scale.set(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">1</span>);        <span class="cm">// tall and thin</span>
+cube.scale.setScalar(<span class="nm">1.5</span>);      <span class="cm">// uniform 1.5x</span>
+
+<span class="cm">// Axes:  +X right   +Y up   +Z toward the viewer</span></pre>
+  <div class="analogy">&#128208; Position = GPS coordinates. Rotation = compass bearing + tilt. Scale = size multiplier before render.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="loop">
+  <div class="section-head"><div class="section-num">LOOP</div><div class="section-title">The Render Loop — requestAnimationFrame</div></div>
+  <div class="card"><p><code>requestAnimationFrame</code> is a <strong>browser API</strong> that calls a function just before each screen repaint — typically 60fps. It is the heartbeat of any Three.js animation: update the scene, render it, request the next frame.</p></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name">requestAnimationFrame(fn)</div><p>Schedules <code>fn</code> to run <strong>before the next browser repaint</strong>. Automatically pauses when the tab is hidden — saves CPU and GPU.</p></div>
+    <div class="term-card"><div class="term-name">renderer.render(scene, cam)</div><p>The <strong>actual draw call</strong>. Takes a snapshot from the camera's viewpoint and paints it to the canvas. Called every frame.</p></div>
+    <div class="term-card"><div class="term-name">THREE.Clock</div><p><code>clock.getElapsedTime()</code> = total seconds. <code>clock.getDelta()</code> = seconds since last call. Use for frame-rate-independent motion.</p></div>
+    <div class="term-card"><div class="term-name">Delta Time</div><p>Time between frames. Multiply speeds by delta so animation runs at the <strong>same pace on all devices</strong> regardless of frame rate.</p></div>
+  </div>
+  <pre><span class="kw">const</span> clock = <span class="kw">new</span> THREE.<span class="nm">Clock</span>();
+
+<span class="kw">function</span> <span class="nm">animate</span>() {
+  requestAnimationFrame(animate);          <span class="cm">// schedule next frame</span>
+  cube.rotation.y = clock.getElapsedTime() * <span class="nm">0.5</span>;
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate(); <span class="cm">// call once — recursion handles the rest</span></pre>
+  <div class="note">&#128204; Never call <code>animate()</code> more than once. The <code>requestAnimationFrame</code> inside it handles all subsequent frames automatically.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="controls">
+  <div class="section-head"><div class="section-num">CONTROLS</div><div class="section-title">OrbitControls &amp; Window Resize</div></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name">OrbitControls</div><p>An <strong>add-on</strong> (not in core Three.js) that lets users orbit, zoom, and pan with mouse or touch. Imported separately from <code>three/addons/</code>.</p></div>
+    <div class="term-card"><div class="term-name">controls.enableDamping</div><p>Adds <strong>inertia</strong> — camera eases to a stop. Requires <code>controls.update()</code> every frame in the render loop.</p></div>
+    <div class="term-card"><div class="term-name">controls.target</div><p>The <strong>orbit centre point</strong>. Default is the origin. Assign a <code>Vector3</code> to orbit a different point.</p></div>
+    <div class="term-card"><div class="term-name">Window Resize Handler</div><p>On resize, camera aspect and renderer output go stale. Always listen for <code>window.resize</code> and update both.</p></div>
+  </div>
+  <pre><span class="kw">import</span> { OrbitControls } <span class="kw">from</span> <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+
+<span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, renderer.domElement);
+controls.enableDamping = <span class="kw">true</span>;
+controls.dampingFactor  = <span class="nm">0.05</span>;
+
+window.addEventListener(<span class="st">'resize'</span>, () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();  <span class="cm">// MUST call after changing aspect</span>
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});</pre>
+  <div class="warn">&#9888; Forgetting <code>camera.updateProjectionMatrix()</code> after changing <code>camera.aspect</code> silently keeps the old projection — one of the most common beginner bugs.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="extras">
+  <div class="section-head"><div class="section-num">EXTRAS</div><div class="section-title">Groups, Textures, Raycaster &amp; Dispose</div></div>
+  <div class="term-grid">
+    <div class="term-card"><div class="term-name">THREE.Group</div><p>An <code>Object3D</code> with no geometry or material — a <strong>parent container</strong>. Move or rotate the group and all children follow.</p></div>
+    <div class="term-card"><div class="term-name">TextureLoader</div><p>Loads an image (JPG, PNG, WebP) and converts it to a <code>Texture</code> assignable to material slots like <code>material.map</code>.</p></div>
+    <div class="term-card"><div class="term-name">material.map</div><p>The <strong>diffuse colour texture</strong> slot. Assign a loaded texture to paint an image onto the mesh surface.</p></div>
+    <div class="term-card"><div class="term-name">Raycaster</div><p>Shoots a ray from a 2D screen point into the 3D scene. Returns which objects it hits — used for <strong>mouse click detection</strong> on 3D objects.</p></div>
+    <div class="term-card"><div class="term-name">Scene Graph / Hierarchy</div><p>The <strong>parent–child tree</strong> of objects. A child's transforms are relative to its parent. Scene is the root node.</p></div>
+    <div class="term-card"><div class="term-name">geometry.dispose()</div><p><strong>Frees GPU memory.</strong> JS heap is automatic but Three.js GPU buffers must be freed manually with <code>.dispose()</code>.</p></div>
+  </div>
+  <pre><span class="cm">// Group — move multiple objects as one</span>
+<span class="kw">const</span> group = <span class="kw">new</span> THREE.<span class="nm">Group</span>();
+group.add(cube, sphere);
+scene.add(group);
+group.rotation.y += <span class="nm">0.01</span>; <span class="cm">// rotates all children</span>
+
+<span class="cm">// TextureLoader</span>
+<span class="kw">const</span> tex = <span class="kw">new</span> THREE.<span class="nm">TextureLoader</span>().load(<span class="st">'./texture.jpg'</span>);
+material.map = tex;
+material.needsUpdate = <span class="kw">true</span>;
+
+<span class="cm">// Raycaster — pick objects with mouse</span>
+<span class="kw">const</span> ray   = <span class="kw">new</span> THREE.<span class="nm">Raycaster</span>();
+<span class="kw">const</span> mouse = <span class="kw">new</span> THREE.<span class="nm">Vector2</span>();
+window.addEventListener(<span class="st">'click'</span>, e => {
+  mouse.x =  (e.clientX / innerWidth)  * <span class="nm">2</span> - <span class="nm">1</span>;
+  mouse.y = -(e.clientY / innerHeight) * <span class="nm">2</span> + <span class="nm">1</span>;
+  ray.setFromCamera(mouse, camera);
+  <span class="kw">const</span> hits = ray.intersectObjects(scene.children);
+  <span class="kw">if</span> (hits.length) console.log(<span class="st">'hit:'</span>, hits[<span class="nm">0</span>].object.name);
+});</pre>
+  <div class="tip">&#10003; For every <code>new THREE.XXXGeometry()</code> and <code>new THREE.XXXMaterial()</code>, there should be a matching <code>.dispose()</code> when the object is removed.</div>
+
+  <div class="divider"></div>
+
+  <div class="section-head" style="margin-top:30px"><div class="section-num green">TEMPLATE</div><div class="section-title">Minimal Working Scene</div></div>
+  <div class="card"><p>The absolute minimum to get a spinning, lit cube running in a browser. Every Three.js project expands outward from this.</p></div>
+  <div class="code-head">
+    <span class="code-label">starter-template.html</span>
+    <button class="cbtn" id="copyBtn" onclick="copyTemplate(this)">Copy</button>
+  </div>
+  <pre><span class="tg">&lt;!DOCTYPE html&gt;&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;&lt;head&gt;
+  &lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;
+  &lt;meta</span> <span class="at">name</span>=<span class="st">"viewport"</span> <span class="at">content</span>=<span class="st">"width=device-width,initial-scale=1"</span><span class="tg">&gt;
+  &lt;title&gt;</span>Three.js Starter<span class="tg">&lt;/title&gt;
+  &lt;style&gt;</span>* { margin: 0 } body { overflow: hidden }<span class="tg">&lt;/style&gt;
+  &lt;script</span> <span class="at">type</span>=<span class="st">"importmap"</span><span class="tg">&gt;</span>
+    { <span class="st">"imports"</span>: {
+        <span class="st">"three"</span>: <span class="st">"https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js"</span>,
+        <span class="st">"three/addons/"</span>: <span class="st">"https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/"</span> }}
+  <span class="tg">&lt;/script&gt;&lt;/head&gt;
+&lt;body&gt;&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+  <span class="kw">import</span> { OrbitControls } <span class="kw">from</span> <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+
+  <span class="cm">// 1 · Scene</span>
+  <span class="kw">const</span> scene    = <span class="kw">new</span> THREE.<span class="nm">Scene</span>();
+  <span class="cm">// 2 · Camera</span>
+  <span class="kw">const</span> camera   = <span class="kw">new</span> THREE.<span class="nm">PerspectiveCamera</span>(<span class="nm">60</span>, innerWidth/innerHeight, <span class="nm">0.1</span>, <span class="nm">100</span>);
+  camera.position.set(<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">4</span>);
+  <span class="cm">// 3 · Renderer</span>
+  <span class="kw">const</span> renderer = <span class="kw">new</span> THREE.<span class="nm">WebGLRenderer</span>({ antialias: <span class="kw">true</span> });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, <span class="nm">2</span>));
+  document.body.appendChild(renderer.domElement);
+  <span class="cm">// 4 · Mesh</span>
+  <span class="kw">const</span> cube = <span class="kw">new</span> THREE.<span class="nm">Mesh</span>(
+    <span class="kw">new</span> THREE.<span class="nm">BoxGeometry</span>(),
+    <span class="kw">new</span> THREE.<span class="nm">MeshStandardMaterial</span>({ color: <span class="nm">0x8b5cf6</span>, roughness: <span class="nm">0.3</span> })
+  );
+  scene.add(cube);
+  <span class="cm">// 5 · Lights</span>
+  scene.add(<span class="kw">new</span> THREE.<span class="nm">AmbientLight</span>(<span class="nm">0xffffff</span>, <span class="nm">0.5</span>));
+  <span class="kw">const</span> sun = <span class="kw">new</span> THREE.<span class="nm">DirectionalLight</span>(<span class="nm">0xffffff</span>, <span class="nm">1.5</span>);
+  sun.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>); scene.add(sun);
+  <span class="cm">// 6 · Controls</span>
+  <span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = <span class="kw">true</span>;
+  <span class="cm">// 7 · Resize</span>
+  window.addEventListener(<span class="st">'resize'</span>, () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+  <span class="cm">// 8 · Loop</span>
+  <span class="kw">const</span> clock = <span class="kw">new</span> THREE.<span class="nm">Clock</span>();
+  (<span class="kw">function</span> <span class="nm">animate</span>() {
+    requestAnimationFrame(animate);
+    cube.rotation.y = clock.getElapsedTime() * <span class="nm">0.5</span>;
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+<span class="tg">&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</span></pre>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>4E Virtual Design &nbsp;&middot;&nbsp; HTML &amp; Three.js Terminology Reference &nbsp;&middot;&nbsp; <span style="color:#3f4460">Scene &middot; Camera &middot; Renderer &middot; Geometry &middot; Material &middot; Mesh &middot; Lights &middot; Transforms &middot; Loop</span></footer>
+
+<script>
+function copyTemplate(btn) {
+  var lines = [
+    '<!DOCTYPE html><html lang="en"><head>',
+    '  <meta charset="UTF-8">',
+    '  <meta name="viewport" content="width=device-width,initial-scale=1">',
+    '  <title>Three.js Starter<\/title>',
+    '  <style>* { margin: 0 } body { overflow: hidden }<\/style>',
+    '  <script type="importmap">',
+    '    { "imports": {',
+    '        "three": "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js",',
+    '        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/" }}',
+    '  <\/script><\/head>',
+    '<body><script type="module">',
+    "  import * as THREE from 'three';",
+    "  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';",
+    '  const scene    = new THREE.Scene();',
+    '  const camera   = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);',
+    '  camera.position.set(0, 1, 4);',
+    '  const renderer = new THREE.WebGLRenderer({ antialias: true });',
+    '  renderer.setSize(innerWidth, innerHeight);',
+    '  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));',
+    '  document.body.appendChild(renderer.domElement);',
+    '  const cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.3 }));',
+    '  scene.add(cube);',
+    '  scene.add(new THREE.AmbientLight(0xffffff, 0.5));',
+    '  const sun = new THREE.DirectionalLight(0xffffff, 1.5);',
+    '  sun.position.set(5,5,5); scene.add(sun);',
+    '  const controls = new OrbitControls(camera, renderer.domElement);',
+    '  controls.enableDamping = true;',
+    "  window.addEventListener('resize', () => {",
+    '    camera.aspect = innerWidth / innerHeight;',
+    '    camera.updateProjectionMatrix();',
+    '    renderer.setSize(innerWidth, innerHeight);',
+    '  });',
+    '  const clock = new THREE.Clock();',
+    '  (function animate() {',
+    '    requestAnimationFrame(animate);',
+    '    cube.rotation.y = clock.getElapsedTime() * 0.5;',
+    '    controls.update();',
+    '    renderer.render(scene, camera);',
+    '  })();',
+    '<\/script><\/body><\/html>'
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    btn.textContent = 'Copied!'; btn.classList.add('ok');
+    setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
