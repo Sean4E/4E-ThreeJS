@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLB Journey - Blender to Browser</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080f;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#8b5cf6;--accent2:#38bdf8;--accent3:#f97316;--accent4:#34d399;--text:#e8eaf0;--dim:#7a7f96;--code-bg:rgba(0,0,0,0.5);--mono:'Space Mono',monospace;--display:'Syne',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--display);line-height:1.7}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(139,92,246,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.02) 1px,transparent 1px);background-size:60px 60px}
+.hero{position:relative;padding:70px 40px 30px;text-align:center;z-index:1}
+.hero-badge{display:inline-block;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:24px}
+.hero h1{font-size:clamp(34px,6vw,68px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:16px}
+.hero h1 .purple{color:var(--accent)}
+.hero p{font-size:16px;color:var(--dim);max-width:580px;margin:0 auto 12px;line-height:1.8}
+.hero-sub{font-family:var(--mono);font-size:11px;color:#3f4460;letter-spacing:1px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:0 40px 40px;z-index:1;position:relative}
+.nav a{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s;letter-spacing:0.5px}
+.nav a:hover,.nav a.active{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:var(--accent)}
+.nav-div{width:100%;text-align:center;font-family:var(--mono);font-size:10px;color:#2a2d3a;letter-spacing:2px;padding:4px 0}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.lesson{margin-bottom:50px}
+.lesson-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.lesson-num{font-family:var(--mono);font-size:12px;color:var(--accent);background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);padding:4px 10px;border-radius:6px;white-space:nowrap;margin-top:5px}
+.lesson-title{font-size:clamp(20px,3vw,30px);font-weight:800;letter-spacing:-1px;line-height:1.1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 26px;margin-bottom:16px;backdrop-filter:blur(8px)}
+.card p{font-size:15px;color:#c5cad8;line-height:1.85}
+.card strong{color:var(--accent);font-weight:700}
+.card .blue{color:var(--accent2)}
+.card .orange{color:var(--accent3)}
+.analogy{background:rgba(56,189,248,0.06);border-left:3px solid var(--accent2);padding:12px 18px;border-radius:0 10px 10px 0;margin:12px 0;font-size:14px;color:#a5c8e8;font-style:italic}
+.blender-note{background:rgba(139,92,246,0.06);border-left:3px solid var(--accent);padding:10px 16px;border-radius:0 10px 10px 0;margin:12px 0 0;font-size:13px;color:#b8a5e8;font-style:italic}
+.code-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.code-label{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.cbtn{background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:5px;cursor:pointer;transition:all 0.2s}
+.cbtn:hover{color:var(--accent);border-color:rgba(139,92,246,0.3)}
+.cbtn.full{background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);color:var(--accent)}
+.cbtn.full:hover{background:rgba(139,92,246,0.18)}
+.cbtn.ok{border-color:#4ade80;color:#4ade80;background:rgba(74,222,128,0.1)}
+pre{background:var(--code-bg);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.85;color:var(--text);margin-bottom:16px;white-space:pre}
+code{font-family:inherit}
+.kw{color:#c792ea}.st{color:#c3e88d}.nm{color:#f78c6c}.cm{color:#546e7a;font-style:italic}
+.dv{color:#f78c6c;background:rgba(139,92,246,0.18);border-bottom:2px solid rgba(139,92,246,0.5);padding:0 3px;border-radius:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.two>div{min-width:0}
+.two pre{max-height:420px;overflow-y:auto}
+@media(max-width:850px){.two{grid-template-columns:1fr}.two .canvas-side{order:-1}.hero{padding:50px 20px 20px}.nav{padding:0 16px 24px}.wrap{padding:0 14px}pre{font-size:11px;padding:14px}}
+.cbox{border-radius:16px;overflow:hidden;border:1px solid var(--border);position:relative;background:#0d0d18}
+.cbox canvas{width:100%!important;height:350px!important;display:block}
+.clabel{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:5px;letter-spacing:1px;text-transform:uppercase;z-index:10}
+.cnote{font-size:12px;color:var(--dim);margin-top:8px;font-style:italic}
+.ctrl{margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.ctrl label{color:var(--dim);font-size:11px;font-family:var(--mono);white-space:nowrap}
+.ctrl input[type="range"]{width:70px;accent-color:var(--accent)}
+.ctrl input[type="color"]{width:26px;height:22px;border:1px solid var(--border);border-radius:4px;padding:0;cursor:pointer;background:none}
+.ctrl .vv{color:var(--dim);font-family:var(--mono);font-size:11px;min-width:28px}
+.ctrl select{background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px;font-family:var(--mono)}
+.btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all 0.15s}
+.btn:hover{border-color:var(--accent);color:var(--text)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:40px 0}
+.part-div{max-width:1100px;margin:30px auto 20px;padding:0 24px}
+.part-inner{border:1px solid var(--border);border-radius:12px;padding:20px 24px;text-align:center;background:linear-gradient(135deg,rgba(139,92,246,0.06),transparent)}
+.part-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:3px;color:var(--accent);margin-bottom:4px}
+.part-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.part-desc{color:var(--dim);font-size:14px}
+.tmpl{max-width:1100px;margin:0 auto 24px;padding:0 24px}
+.tmpl-card{background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.15);border-radius:16px;padding:24px 28px}
+.tmpl-card h2{font-size:20px;font-weight:800;margin-bottom:10px;color:var(--accent4)}
+.tmpl-card p{font-size:15px;color:#c5cad8;line-height:1.8;margin-bottom:14px}
+.tmpl-card .code-label{color:var(--accent4)}
+.tmpl-card .cbtn:hover{color:var(--accent4);border-color:rgba(52,211,153,0.3)}
+.tmpl-card pre{border-color:rgba(52,211,153,0.12)}
+.dl-section{max-width:1100px;margin:30px auto;padding:0 24px}
+.dl-card{background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(56,189,248,0.06));border:1px solid rgba(139,92,246,0.2);border-radius:16px;padding:28px;text-align:center}
+.dl-card h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.dl-card p{color:var(--dim);font-size:14px;margin-bottom:20px}
+.dl-btn{display:inline-block;padding:10px 24px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--mono);font-size:13px;cursor:pointer;margin:0 6px;transition:all 0.2s}
+.dl-btn:hover{background:rgba(139,92,246,0.8)}
+.dl-btn.sec{background:transparent;color:var(--accent)}
+.dl-btn.sec:hover{background:rgba(139,92,246,0.12)}
+footer{text-align:center;padding:36px 24px;color:var(--dim);font-family:var(--mono);font-size:11px;border-top:1px solid var(--border);margin-top:50px;position:relative;z-index:1}
+.status-bar{margin-top:6px;padding:6px 10px;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:11px;color:var(--dim);min-height:24px}
+.status-bar.ok{color:var(--accent4);border-color:rgba(52,211,153,0.3)}
+.status-bar.anim{color:var(--accent2);border-color:rgba(56,189,248,0.3)}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:10px;font-size:13px;color:#c5cad8;line-height:1.7}
+.info-card strong{color:var(--accent2)}
+.info-card .step-arrow{color:var(--accent);margin:0 6px}
+.pick-overlay{position:absolute;top:8px;right:8px;z-index:10}
+.pick-overlay input[type="file"]{font-family:var(--mono);font-size:10px;color:#fff;background:rgba(139,92,246,0.3);border:1px solid rgba(139,92,246,0.5);border-radius:8px;padding:5px 10px;cursor:pointer;max-width:160px}
+.pick-overlay input[type="file"]::file-selector-button{font-family:var(--mono);font-size:10px;color:#fff;background:rgba(139,92,246,0.5);border:1px solid rgba(139,92,246,0.6);border-radius:4px;padding:2px 8px;cursor:pointer;margin-right:6px}
+.anim-controls{margin-top:8px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.anim-controls h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:6px}
+.anim-btn-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.anim-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all 0.15s}
+.anim-btn:hover{border-color:var(--accent);color:var(--text)}
+.anim-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.anim-btn.paused{background:rgba(249,115,22,0.2);color:var(--accent3);border-color:rgba(249,115,22,0.4)}
+.anim-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.anim-item{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:rgba(0,0,0,0.2);font-family:var(--mono);font-size:11px;color:var(--dim);transition:all 0.15s}
+.anim-item.playing{border-color:rgba(56,189,248,0.4);color:var(--accent2);background:rgba(56,189,248,0.06)}
+.anim-item input[type="checkbox"]{accent-color:var(--accent2);cursor:pointer}
+.anim-item label{cursor:pointer;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.no-anims{color:var(--dim);font-family:var(--mono);font-size:11px;font-style:italic;padding:8px 0}
+.canvas-panel{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:10px;padding:10px 12px;z-index:15;display:none}
+.canvas-panel h4{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:6px}
+.canvas-panel .anim-btn-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px}
+.canvas-panel .anim-btn{padding:3px 8px;font-size:10px}
+.canvas-panel .ctrl{margin:0;padding:4px 0;border:none;background:none;font-size:11px}
+.canvas-panel .ctrl label{font-size:10px}
+.canvas-panel .ctrl input[type="range"]{width:60px}
+.canvas-panel .anim-list{max-height:120px;overflow-y:auto;gap:3px}
+.canvas-panel .anim-item{padding:3px 6px;font-size:10px}
+.canvas-panel .anim-item label{font-size:10px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-badge">Build-Along Guide</div>
+  <h1>GLB <span class="purple">Journey</span></h1>
+  <p>Six steps plus bonus. Add real Blender models to your Three.js scene. Pick up where Week 7 left off.</p>
+  <div class="hero-sub">Part 1: GLB Import &middot; Bonus: Animation Controls</div>
+</div>
+
+<div class="nav">
+  <a href="#tmpl">Starter Template</a>
+  <a href="#s1">01 Recap</a>
+  <a href="#s2">02 File Input</a>
+  <a href="#s3">03 Loader</a>
+  <a href="#s4">04 Import</a>
+  <a href="#s5">05 Position</a>
+  <a href="#s6">06 Animate</a>
+  <a href="#download1">Download</a>
+  <div class="nav-div">-- Bonus --</div>
+  <a href="#b1">Play / Pause</a>
+  <a href="#b2">Multi-Animation</a>
+  <a href="#download">Download+</a>
+</div>
+
+<!-- ══ STARTER TEMPLATE ══ -->
+<div class="tmpl" id="tmpl">
+  <div class="tmpl-card">
+    <h2>Your Week 7 Scene</h2>
+    <p>Start with the scene you built in Week 7. If you haven't done the Week 7 journey yet, do that first. This journey adds GLB import on top of your existing scene.</p>
+    <p>The template below is your Week 7 output with <strong style="color:var(--accent4)">two additions</strong>: a file picker input and the GLTFLoader import.</p>
+    <div class="code-head">
+      <span class="code-label">my-glb-scene.html</span>
+      <div><button class="cbtn" onclick="copyEl('tmpl-code')">Copy</button></div>
+    </div>
+    <pre><code id="tmpl-code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;My GLB Scene&lt;/title&gt;
+  &lt;style&gt;
+    * { margin:0; padding:0; }
+    body { overflow:hidden; background:#000; }
+    canvas { display:block; }
+    #pick { position:fixed; top:10px; left:10px; z-index:10;
+      font-family:monospace; font-size:12px; color:#fff;
+      background:rgba(139,92,246,0.3);
+      border:1px solid rgba(139,92,246,0.5);
+      border-radius:8px; padding:8px 12px; cursor:pointer; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  <span class="cm">&lt;!-- NEW: File picker for GLB files --&gt;</span>
+  &lt;input type="file" id="pick" accept=".glb,.gltf"&gt;
+  &lt;canvas id="canvas"&gt;&lt;/canvas&gt;
+
+  &lt;script type="importmap"&gt;
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  &lt;/script&gt;
+
+  &lt;script type="module"&gt;
+  <span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+  <span class="kw">import</span> { OrbitControls } <span class="kw">from</span> <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+  <span class="kw">import</span> { GLTFLoader } <span class="kw">from</span> <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;  <span class="cm">// NEW!</span>
+
+  <span class="cm">// Scene setup (from Week 7)</span>
+  <span class="kw">const</span> canvas = document.getElementById(<span class="st">'canvas'</span>);
+  <span class="kw">const</span> scene = <span class="kw">new</span> THREE.Scene();
+  scene.background = <span class="kw">new</span> THREE.Color(<span class="nm">0x1a1a2e</span>);
+
+  <span class="kw">const</span> camera = <span class="kw">new</span> THREE.PerspectiveCamera(
+      <span class="nm">50</span>, innerWidth / innerHeight, <span class="nm">0.1</span>, <span class="nm">100</span>);
+  camera.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">5</span>);
+
+  <span class="kw">const</span> renderer = <span class="kw">new</span> THREE.WebGLRenderer(
+      { canvas, antialias: <span class="nm">true</span> });
+  renderer.setSize(innerWidth, innerHeight);
+
+  <span class="cm">// A box mesh (from Week 7)</span>
+  <span class="kw">const</span> box = <span class="kw">new</span> THREE.Mesh(
+      <span class="kw">new</span> THREE.BoxGeometry(<span class="nm">1</span>,<span class="nm">1</span>,<span class="nm">1</span>),
+      <span class="kw">new</span> THREE.MeshPhysicalMaterial({
+          color: <span class="nm">0x8b5cf6</span>,
+          metalness: <span class="nm">0.3</span>, roughness: <span class="nm">0.5</span>
+      })
+  );
+  scene.add(box);
+
+  <span class="cm">// Lights</span>
+  scene.add(<span class="kw">new</span> THREE.AmbientLight(<span class="nm">0xffffff</span>, <span class="nm">0.4</span>));
+  <span class="kw">const</span> sun = <span class="kw">new</span> THREE.DirectionalLight(<span class="nm">0xffffff</span>, <span class="nm">0.8</span>);
+  sun.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>);
+  scene.add(sun);
+
+  <span class="cm">// Orbit controls</span>
+  <span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, canvas);
+  controls.enableDamping = <span class="nm">true</span>;
+
+  <span class="cm">// Animation loop</span>
+  <span class="kw">function</span> animate() {
+      requestAnimationFrame(animate);
+      box.rotation.y += <span class="nm">0.01</span>;
+      controls.update();
+      renderer.render(scene, camera);
+  }
+  animate();
+
+  <span class="cm">// Resize handler</span>
+  window.addEventListener(<span class="st">'resize'</span>, <span class="kw">function</span>() {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+  });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+</div>
+
+<!-- ══ STEPS ══ -->
+<div class="part-div"><div class="part-inner">
+  <div class="part-label">Blender to Browser</div>
+  <div class="part-title">Six Steps to GLB Import</div>
+  <p class="part-desc">Each step adds one idea. By the end, your Blender models live in the browser.</p>
+</div></div>
+
+<div class="wrap">
+
+<!-- ── 01 ── -->
+<section class="lesson" id="s1">
+  <div class="lesson-head"><span class="lesson-num">01</span><h2 class="lesson-title">Your Starting Point</h2></div>
+  <div class="card">
+    <p>You already have a working 3D scene from Week 7 &mdash; a shape, materials, lights, orbit controls, and animation. This journey adds one thing: <strong>loading real Blender models</strong>.</p>
+    <div class="analogy">Your Week 7 scene is the stage. Now we're bringing in the actors &mdash; your own 3D models from Blender.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 1 &mdash; The imports (note the new one)</span>
+        <div><button class="cbtn" onclick="copyEl('code-1')">Copy</button></div>
+      </div>
+      <pre><code id="code-1"><span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+
+<span class="kw">import</span> { OrbitControls } <span class="kw">from</span>
+  <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+
+<span class="kw">import</span> { GLTFLoader } <span class="kw">from</span>
+  <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;  <span class="cm">// NEW!</span></code></pre>
+      <div class="card" style="margin-top:0">
+        <p>The first two imports are from Week 7. The third &mdash; <strong>GLTFLoader</strong> &mdash; is the tool that reads .glb files and turns them into Three.js objects.</p>
+      </div>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c1"></canvas><span class="clabel">Live &mdash; Your Week 7 Scene</span></div>
+      <p class="cnote">This is your starting point &mdash; the scene from Week 7 with a spinning box, lights, and orbit controls.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── 02 ── -->
+<section class="lesson" id="s2">
+  <div class="lesson-head"><span class="lesson-num">02</span><h2 class="lesson-title">Add a File Picker</h2></div>
+  <div class="card">
+    <p>To load GLB files locally (without a server), we let the user <strong>pick the file</strong> with an HTML input. This bypasses CORS &mdash; the same trick we used for textures in Week 7.</p>
+    <div class="analogy">Like an "Open File" dialog in any app. The browser reads the file directly &mdash; no upload, no server.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 2 &mdash; HTML + event listener</span>
+        <div><button class="cbtn" onclick="copyEl('code-2')">Copy</button></div>
+      </div>
+      <pre><code id="code-2"><span class="cm">&lt;!-- In your HTML, before the canvas --&gt;</span>
+&lt;input type=<span class="st">"file"</span> id=<span class="st">"pick"</span>
+       accept=<span class="st">".glb,.gltf"</span>&gt;
+
+<span class="cm">// In your script</span>
+document.getElementById(<span class="st">'pick'</span>)
+  .addEventListener(<span class="st">'change'</span>, <span class="kw">function</span>(e) {
+    <span class="kw">const</span> file = e.target.files[<span class="nm">0</span>];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+    console.log(<span class="st">'Selected:'</span>, file.name);
+    <span class="cm">// Next step: read the file...</span>
+  });</code></pre>
+      <div class="card" style="margin-top:0">
+        <p><code>accept=".glb,.gltf"</code> filters the file dialog to only show 3D model files. The <code>change</code> event fires when the user picks a file.</p>
+      </div>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c2"></canvas><span class="clabel">Live</span>
+        <div class="pick-overlay"><input type="file" id="pick2" accept=".glb,.gltf"></div>
+      </div>
+      <div class="status-bar" id="status2">Pick a file to see its name here</div>
+      <p class="cnote">Try picking any .glb file &mdash; the filename appears below. Nothing loads yet.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── 03 ── -->
+<section class="lesson" id="s3">
+  <div class="lesson-head"><span class="lesson-num">03</span><h2 class="lesson-title">The Loader</h2></div>
+  <div class="card">
+    <p><strong>GLTFLoader</strong> is Three.js's tool for reading GLB/glTF files. Import it just like OrbitControls &mdash; from <code>three/addons/</code>. The <code>.parse()</code> method takes raw binary data instead of a URL, which is how we bypass CORS.</p>
+    <div class="blender-note">GLTFLoader understands Blender's Principled BSDF materials. If it looks right in Blender's Material Preview, it will look right in Three.js.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 3 &mdash; FileReader + GLTFLoader.parse</span>
+        <div><button class="cbtn" onclick="copyEl('code-3')">Copy</button></div>
+      </div>
+      <pre><code id="code-3"><span class="kw">import</span> { GLTFLoader } <span class="kw">from</span>
+  <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;
+
+<span class="cm">// Inside your file change listener:</span>
+<span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+reader.onload = <span class="kw">function</span>() {
+    <span class="kw">const</span> loader = <span class="kw">new</span> GLTFLoader();
+    loader.parse(reader.result, <span class="st">''</span>,
+      <span class="kw">function</span>(gltf) {
+        scene.add(gltf.scene);
+      }
+    );
+};
+reader.readAsArrayBuffer(file);</code></pre>
+    </div>
+    <div class="canvas-side">
+      <div class="info-card">
+        <strong>FileReader</strong> reads the file from disk<br>
+        <span class="step-arrow">&rarr;</span> gives us an <strong>ArrayBuffer</strong> (raw binary data)
+      </div>
+      <div class="info-card">
+        <strong>GLTFLoader.parse()</strong> converts binary<br>
+        <span class="step-arrow">&rarr;</span> into <strong>Three.js objects</strong> (meshes, materials, animations)
+      </div>
+      <div class="info-card">
+        <strong>gltf.scene</strong> is a Group containing all meshes<br>
+        <span class="step-arrow">&rarr;</span> <code>scene.add(gltf.scene)</code> puts them in your world
+      </div>
+      <p class="cnote">No live demo here &mdash; we combine everything in the next step.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── 04 ── -->
+<section class="lesson" id="s4">
+  <div class="lesson-head"><span class="lesson-num">04</span><h2 class="lesson-title">Load a GLB</h2></div>
+  <div class="card">
+    <p>Here's the complete import code &mdash; all the pieces from Steps 2 and 3 combined. <strong>Try it</strong>: click the file picker on the right and load any .glb file.</p>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 4 &mdash; Complete GLB import</span>
+        <div><button class="cbtn" onclick="copyEl('code-4')">Copy</button><button class="cbtn full" onclick="copyEl('full-4')">Full Script</button></div>
+      </div>
+      <pre><code id="code-4">document.getElementById(<span class="st">'pick'</span>)
+  .addEventListener(<span class="st">'change'</span>, <span class="kw">function</span>(e) {
+    <span class="kw">const</span> file = e.target.files[<span class="nm">0</span>];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+
+    <span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+    reader.onload = <span class="kw">function</span>() {
+      <span class="kw">const</span> loader = <span class="kw">new</span> GLTFLoader();
+      loader.parse(reader.result, <span class="st">''</span>,
+        <span class="kw">function</span>(gltf) {
+          <span class="cm">// Add to scene</span>
+          scene.add(gltf.scene);
+        }
+      );
+    };
+    reader.readAsArrayBuffer(file);
+  });</code></pre>
+      <details><summary style="font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;margin-bottom:12px">Full Script (Steps 1-4)</summary>
+      <pre><code id="full-4"><span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+<span class="kw">import</span> { OrbitControls } <span class="kw">from</span>
+  <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+<span class="kw">import</span> { GLTFLoader } <span class="kw">from</span>
+  <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;
+
+<span class="cm">// Scene setup</span>
+<span class="kw">const</span> canvas = document.getElementById(<span class="st">'canvas'</span>);
+<span class="kw">const</span> scene = <span class="kw">new</span> THREE.Scene();
+scene.background = <span class="kw">new</span> THREE.Color(<span class="nm">0x1a1a2e</span>);
+
+<span class="kw">const</span> camera = <span class="kw">new</span> THREE.PerspectiveCamera(
+    <span class="nm">50</span>, innerWidth / innerHeight, <span class="nm">0.1</span>, <span class="nm">100</span>);
+camera.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">5</span>);
+
+<span class="kw">const</span> renderer = <span class="kw">new</span> THREE.WebGLRenderer(
+    { canvas, antialias: <span class="nm">true</span> });
+renderer.setSize(innerWidth, innerHeight);
+
+<span class="cm">// Box mesh (from Week 7)</span>
+<span class="kw">const</span> box = <span class="kw">new</span> THREE.Mesh(
+    <span class="kw">new</span> THREE.BoxGeometry(<span class="nm">1</span>,<span class="nm">1</span>,<span class="nm">1</span>),
+    <span class="kw">new</span> THREE.MeshPhysicalMaterial({
+        color: <span class="nm">0x8b5cf6</span>,
+        metalness: <span class="nm">0.3</span>, roughness: <span class="nm">0.5</span>
+    })
+);
+scene.add(box);
+
+<span class="cm">// Lights</span>
+scene.add(<span class="kw">new</span> THREE.AmbientLight(<span class="nm">0xffffff</span>, <span class="nm">0.4</span>));
+<span class="kw">const</span> sun = <span class="kw">new</span> THREE.DirectionalLight(
+    <span class="nm">0xffffff</span>, <span class="nm">0.8</span>);
+sun.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>);
+scene.add(sun);
+
+<span class="cm">// Orbit controls</span>
+<span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, canvas);
+controls.enableDamping = <span class="nm">true</span>;
+
+<span class="cm">// ── GLB Import (Steps 2-4) ──</span>
+document.getElementById(<span class="st">'pick'</span>)
+  .addEventListener(<span class="st">'change'</span>, <span class="kw">function</span>(e) {
+    <span class="kw">const</span> file = e.target.files[<span class="nm">0</span>];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+    <span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+    reader.onload = <span class="kw">function</span>() {
+      <span class="kw">const</span> loader = <span class="kw">new</span> GLTFLoader();
+      loader.parse(reader.result, <span class="st">''</span>,
+        <span class="kw">function</span>(gltf) {
+          scene.add(gltf.scene);
+        }
+      );
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+<span class="cm">// Animation loop</span>
+<span class="kw">function</span> animate() {
+    requestAnimationFrame(animate);
+    box.rotation.y += <span class="nm">0.01</span>;
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
+
+<span class="cm">// Resize</span>
+window.addEventListener(<span class="st">'resize'</span>, <span class="kw">function</span>() {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+});</code></pre></details>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c4"></canvas><span class="clabel">Live &mdash; Try it!</span>
+        <div class="pick-overlay"><input type="file" id="pick4" accept=".glb,.gltf"></div>
+      </div>
+      <div class="status-bar" id="status4">Pick a .glb file to load it into the scene</div>
+      <p class="cnote">Load any .glb file &mdash; it appears in the scene. Orbit to inspect it.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── 05 ── -->
+<section class="lesson" id="s5">
+  <div class="lesson-head"><span class="lesson-num">05</span><h2 class="lesson-title">Make It Fit</h2></div>
+  <div class="card">
+    <p>Your Blender model might be too big, too small, or off-center when it first loads. Adjust it with the same <strong>transforms</strong> you used in Week 7 &mdash; position, rotation, scale.</p>
+    <div class="analogy">Same as Blender's G, R, S keys &mdash; but with numbers.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 5 &mdash; Transform after loading</span>
+        <div><button class="cbtn" onclick="copyEl('code-5')">Copy</button><button class="cbtn full" onclick="copyEl('full-5')">Full Script</button></div>
+      </div>
+      <pre><code id="code-5">loader.parse(reader.result, <span class="st">''</span>,
+  <span class="kw">function</span>(gltf) {
+    <span class="kw">const</span> model = gltf.scene;
+
+    <span class="cm">// Scale (try different values!)</span>
+    model.scale.set(
+      <span class="dv" data-var="m-scale">1.0</span>,
+      <span class="dv" data-var="m-scale">1.0</span>,
+      <span class="dv" data-var="m-scale">1.0</span>
+    );
+
+    <span class="cm">// Position</span>
+    model.position.set(<span class="nm">0</span>, <span class="dv" data-var="m-posy">0</span>, <span class="nm">0</span>);
+
+    <span class="cm">// Rotate (in radians)</span>
+    model.rotation.y = Math.PI / <span class="nm">4</span>;
+
+    <span class="cm">// Auto-centre</span>
+    <span class="kw">const</span> box = <span class="kw">new</span> THREE.Box3()
+      .setFromObject(model);
+    <span class="kw">const</span> center = box.getCenter(
+      <span class="kw">new</span> THREE.Vector3());
+    model.position.sub(center);
+
+    scene.add(model);
+  }
+);</code></pre>
+      <details><summary style="font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;margin-bottom:12px">Full Script (Steps 1-5)</summary>
+      <pre><code id="full-5"><span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+<span class="kw">import</span> { OrbitControls } <span class="kw">from</span>
+  <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+<span class="kw">import</span> { GLTFLoader } <span class="kw">from</span>
+  <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;
+
+<span class="kw">const</span> canvas = document.getElementById(<span class="st">'canvas'</span>);
+<span class="kw">const</span> scene = <span class="kw">new</span> THREE.Scene();
+scene.background = <span class="kw">new</span> THREE.Color(<span class="nm">0x1a1a2e</span>);
+
+<span class="kw">const</span> camera = <span class="kw">new</span> THREE.PerspectiveCamera(
+    <span class="nm">50</span>, innerWidth / innerHeight, <span class="nm">0.1</span>, <span class="nm">100</span>);
+camera.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">5</span>);
+
+<span class="kw">const</span> renderer = <span class="kw">new</span> THREE.WebGLRenderer(
+    { canvas, antialias: <span class="nm">true</span> });
+renderer.setSize(innerWidth, innerHeight);
+
+<span class="kw">const</span> box = <span class="kw">new</span> THREE.Mesh(
+    <span class="kw">new</span> THREE.BoxGeometry(<span class="nm">1</span>,<span class="nm">1</span>,<span class="nm">1</span>),
+    <span class="kw">new</span> THREE.MeshPhysicalMaterial({
+        color: <span class="nm">0x8b5cf6</span>,
+        metalness: <span class="nm">0.3</span>, roughness: <span class="nm">0.5</span>
+    })
+);
+scene.add(box);
+
+scene.add(<span class="kw">new</span> THREE.AmbientLight(<span class="nm">0xffffff</span>, <span class="nm">0.4</span>));
+<span class="kw">const</span> sun = <span class="kw">new</span> THREE.DirectionalLight(
+    <span class="nm">0xffffff</span>, <span class="nm">0.8</span>);
+sun.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>);
+scene.add(sun);
+
+<span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, canvas);
+controls.enableDamping = <span class="nm">true</span>;
+
+<span class="cm">// ── GLB Import with Transforms ──</span>
+document.getElementById(<span class="st">'pick'</span>)
+  .addEventListener(<span class="st">'change'</span>, <span class="kw">function</span>(e) {
+    <span class="kw">const</span> file = e.target.files[<span class="nm">0</span>];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+    <span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+    reader.onload = <span class="kw">function</span>() {
+      <span class="kw">const</span> loader = <span class="kw">new</span> GLTFLoader();
+      loader.parse(reader.result, <span class="st">''</span>,
+        <span class="kw">function</span>(gltf) {
+          <span class="kw">const</span> model = gltf.scene;
+
+          <span class="cm">// Scale</span>
+          model.scale.set(<span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">1</span>);
+
+          <span class="cm">// Auto-centre</span>
+          <span class="kw">const</span> b = <span class="kw">new</span> THREE.Box3()
+            .setFromObject(model);
+          <span class="kw">const</span> c = b.getCenter(
+            <span class="kw">new</span> THREE.Vector3());
+          model.position.sub(c);
+
+          scene.add(model);
+        }
+      );
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+<span class="kw">function</span> animate() {
+    requestAnimationFrame(animate);
+    box.rotation.y += <span class="nm">0.01</span>;
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener(<span class="st">'resize'</span>, <span class="kw">function</span>() {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+});</code></pre></details>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c5"></canvas><span class="clabel">Live &mdash; Transform</span>
+        <div class="pick-overlay"><input type="file" id="pick5" accept=".glb,.gltf"></div>
+      </div>
+      <div class="ctrl">
+        <label>Scale</label><input type="range" id="ctrl-scale" min="0.1" max="3" step="0.1" value="1"><span class="vv" id="ctrl-scale-show">1.0</span>
+        <label>Y Pos</label><input type="range" id="ctrl-posy" min="-2" max="2" step="0.1" value="0"><span class="vv" id="ctrl-posy-show">0.0</span>
+      </div>
+      <div class="status-bar" id="status5">Load a .glb then adjust with sliders</div>
+      <p class="cnote">Load a model, then use the sliders to scale and reposition it.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── 06 ── -->
+<section class="lesson" id="s6">
+  <div class="lesson-head"><span class="lesson-num">06</span><h2 class="lesson-title">Animations</h2></div>
+  <div class="card">
+    <p>If your GLB has animations (from Blender keyframes), you can play them with <strong>AnimationMixer</strong>. This is optional &mdash; only works if your model actually has animations baked in.</p>
+    <div class="blender-note">The animations you created in Week 4 (walk cycles, rotations, bounces) export with the GLB. AnimationMixer plays them back frame by frame.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Step 6 &mdash; AnimationMixer</span>
+        <div><button class="cbtn" onclick="copyEl('code-6')">Copy</button><button class="cbtn full" onclick="copyEl('full-6')">Full Script</button></div>
+      </div>
+      <pre><code id="code-6"><span class="kw">let</span> mixer; <span class="cm">// declare outside</span>
+
+loader.parse(reader.result, <span class="st">''</span>,
+  <span class="kw">function</span>(gltf) {
+    scene.add(gltf.scene);
+
+    <span class="cm">// Play animations if they exist</span>
+    <span class="kw">if</span> (gltf.animations.length &gt; <span class="nm">0</span>) {
+      mixer = <span class="kw">new</span> THREE.AnimationMixer(
+        gltf.scene
+      );
+      <span class="kw">const</span> clip = gltf.animations[<span class="nm">0</span>];
+      mixer.clipAction(clip).play();
+    }
+  }
+);
+
+<span class="cm">// In your animation loop:</span>
+<span class="kw">const</span> clock = <span class="kw">new</span> THREE.Clock();
+<span class="kw">function</span> animate() {
+    requestAnimationFrame(animate);
+    <span class="kw">if</span> (mixer) mixer.update(
+      clock.getDelta()
+    );
+    controls.update();
+    renderer.render(scene, camera);
+}</code></pre>
+      <details><summary style="font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;margin-bottom:12px">Full Script (Steps 1-6 &mdash; Complete)</summary>
+      <pre><code id="full-6"><span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="st">'three'</span>;
+<span class="kw">import</span> { OrbitControls } <span class="kw">from</span>
+  <span class="st">'three/addons/controls/OrbitControls.js'</span>;
+<span class="kw">import</span> { GLTFLoader } <span class="kw">from</span>
+  <span class="st">'three/addons/loaders/GLTFLoader.js'</span>;
+
+<span class="cm">// ── Scene Setup ──</span>
+<span class="kw">const</span> canvas = document.getElementById(<span class="st">'canvas'</span>);
+<span class="kw">const</span> scene = <span class="kw">new</span> THREE.Scene();
+scene.background = <span class="kw">new</span> THREE.Color(<span class="nm">0x1a1a2e</span>);
+
+<span class="kw">const</span> camera = <span class="kw">new</span> THREE.PerspectiveCamera(
+    <span class="nm">50</span>, innerWidth / innerHeight, <span class="nm">0.1</span>, <span class="nm">100</span>);
+camera.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">5</span>);
+
+<span class="kw">const</span> renderer = <span class="kw">new</span> THREE.WebGLRenderer(
+    { canvas, antialias: <span class="nm">true</span> });
+renderer.setSize(innerWidth, innerHeight);
+
+<span class="cm">// Box mesh (from Week 7)</span>
+<span class="kw">const</span> box = <span class="kw">new</span> THREE.Mesh(
+    <span class="kw">new</span> THREE.BoxGeometry(<span class="nm">1</span>,<span class="nm">1</span>,<span class="nm">1</span>),
+    <span class="kw">new</span> THREE.MeshPhysicalMaterial({
+        color: <span class="nm">0x8b5cf6</span>,
+        metalness: <span class="nm">0.3</span>, roughness: <span class="nm">0.5</span>
+    })
+);
+scene.add(box);
+
+<span class="cm">// Lights</span>
+scene.add(<span class="kw">new</span> THREE.AmbientLight(<span class="nm">0xffffff</span>, <span class="nm">0.4</span>));
+<span class="kw">const</span> sun = <span class="kw">new</span> THREE.DirectionalLight(
+    <span class="nm">0xffffff</span>, <span class="nm">0.8</span>);
+sun.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>);
+scene.add(sun);
+
+<span class="cm">// Orbit controls</span>
+<span class="kw">const</span> controls = <span class="kw">new</span> OrbitControls(camera, canvas);
+controls.enableDamping = <span class="nm">true</span>;
+
+<span class="cm">// ── GLB Import + Transforms + Animation ──</span>
+<span class="kw">let</span> mixer;
+<span class="kw">const</span> clock = <span class="kw">new</span> THREE.Clock();
+
+document.getElementById(<span class="st">'pick'</span>)
+  .addEventListener(<span class="st">'change'</span>, <span class="kw">function</span>(e) {
+    <span class="kw">const</span> file = e.target.files[<span class="nm">0</span>];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+    <span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+    reader.onload = <span class="kw">function</span>() {
+      <span class="kw">const</span> loader = <span class="kw">new</span> GLTFLoader();
+      loader.parse(reader.result, <span class="st">''</span>,
+        <span class="kw">function</span>(gltf) {
+          <span class="kw">const</span> model = gltf.scene;
+
+          <span class="cm">// Scale &amp; centre</span>
+          model.scale.set(<span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">1</span>);
+          <span class="kw">const</span> b = <span class="kw">new</span> THREE.Box3()
+            .setFromObject(model);
+          <span class="kw">const</span> c = b.getCenter(
+            <span class="kw">new</span> THREE.Vector3());
+          model.position.sub(c);
+
+          scene.add(model);
+
+          <span class="cm">// Play animations</span>
+          <span class="kw">if</span> (gltf.animations.length &gt; <span class="nm">0</span>) {
+            mixer = <span class="kw">new</span> THREE.AnimationMixer(
+              model);
+            <span class="kw">const</span> clip =
+              gltf.animations[<span class="nm">0</span>];
+            mixer.clipAction(clip).play();
+          }
+        }
+      );
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+<span class="cm">// Animation loop</span>
+<span class="kw">function</span> animate() {
+    requestAnimationFrame(animate);
+    <span class="kw">if</span> (mixer) mixer.update(clock.getDelta());
+    box.rotation.y += <span class="nm">0.01</span>;
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
+
+<span class="cm">// Resize</span>
+window.addEventListener(<span class="st">'resize'</span>, <span class="kw">function</span>() {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+});</code></pre></details>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="c6"></canvas><span class="clabel">Live &mdash; Animations</span>
+        <div class="pick-overlay"><input type="file" id="pick6" accept=".glb,.gltf"></div>
+      </div>
+      <div class="status-bar" id="status6">Load a .glb &mdash; animations play automatically</div>
+      <p class="cnote">If your GLB has animations, they play automatically. Status shows above.</p>
+    </div>
+  </div>
+  <div class="card"><p>That's it &mdash; six steps. You can now load any Blender model into your Three.js scene, position it, and play its animations.</p></div>
+</section>
+
+</div>
+
+<!-- ══ DOWNLOAD 1: BASIC ══ -->
+<div class="dl-section" id="download1">
+  <div class="dl-card">
+    <h2>Download &mdash; Basic GLB Import</h2>
+    <p>A complete HTML file with GLB import. Open it, pick a .glb file, and your model appears with animations.</p>
+    <button class="dl-btn" id="dl-btn-basic">Download HTML</button>
+    <button class="dl-btn sec" id="dl-copy-basic">Copy Code</button>
+  </div>
+</div>
+
+<!-- ══ BONUS ══ -->
+<div class="part-div"><div class="part-inner">
+  <div class="part-label">Bonus</div>
+  <div class="part-title">Animation Controls</div>
+  <p class="part-desc">Two extras. Control playback and manage multiple animations.</p>
+</div></div>
+
+<div class="wrap">
+
+<!-- ── BONUS 1 ── -->
+<section class="lesson" id="b1">
+  <div class="lesson-head"><span class="lesson-num" style="background:var(--accent3);border-color:rgba(249,115,22,0.4)">B1</span><h2 class="lesson-title">Play / Pause</h2></div>
+  <div class="card">
+    <p>AnimationMixer actions have a <strong>paused</strong> property. Toggle it to pause and resume. You can also adjust <strong>timeScale</strong> to speed up or slow down the animation.</p>
+    <div class="analogy">Like the play/pause button on a video. The animation freezes in place and picks up exactly where it left off.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Bonus 1 &mdash; Play/Pause + Speed</span>
+        <div><button class="cbtn" onclick="copyEl('code-b1')">Copy</button></div>
+      </div>
+      <pre><code id="code-b1"><span class="cm">// Store the action so we can control it</span>
+<span class="kw">let</span> currentAction;
+
+<span class="cm">// When loading animations:</span>
+<span class="kw">if</span> (gltf.animations.length &gt; <span class="nm">0</span>) {
+  mixer = <span class="kw">new</span> THREE.AnimationMixer(model);
+  <span class="kw">const</span> clip = gltf.animations[<span class="nm">0</span>];
+  currentAction = mixer.clipAction(clip);
+  currentAction.play();
+}
+
+<span class="cm">// Toggle play/pause</span>
+<span class="kw">function</span> togglePause() {
+  <span class="kw">if</span> (!currentAction) <span class="kw">return</span>;
+  currentAction.paused = !currentAction.paused;
+}
+
+<span class="cm">// Change speed (0.5 = half, 2 = double)</span>
+<span class="kw">function</span> setSpeed(speed) {
+  <span class="kw">if</span> (!currentAction) <span class="kw">return</span>;
+  currentAction.timeScale = speed;
+}
+
+<span class="cm">// Stop completely (resets to start)</span>
+<span class="kw">function</span> stopAnimation() {
+  <span class="kw">if</span> (!currentAction) <span class="kw">return</span>;
+  currentAction.stop();
+}</code></pre>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="cb1"></canvas><span class="clabel">Live &mdash; Play/Pause</span>
+        <div class="pick-overlay"><input type="file" id="pickB1" accept=".glb,.gltf"></div>
+        <div class="canvas-panel" id="ctrlsB1">
+          <h4>Playback</h4>
+          <div class="anim-btn-row">
+            <button class="anim-btn active" id="b1-play">Play</button>
+            <button class="anim-btn" id="b1-pause">Pause</button>
+            <button class="anim-btn" id="b1-stop">Stop</button>
+          </div>
+          <div class="ctrl">
+            <label>Speed</label>
+            <input type="range" id="b1-speed" min="0.1" max="3" step="0.1" value="1">
+            <span class="vv" id="b1-speed-show">1.0x</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-bar" id="statusB1">Load a .glb with animations to test controls</div>
+      <p class="cnote">Load a GLB with animations &mdash; controls appear inside the canvas.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── BONUS 2 ── -->
+<section class="lesson" id="b2">
+  <div class="lesson-head"><span class="lesson-num" style="background:var(--accent3);border-color:rgba(249,115,22,0.4)">B2</span><h2 class="lesson-title">Multi-Animation</h2></div>
+  <div class="card">
+    <p>Many GLB files have <strong>multiple animations</strong> &mdash; walk, run, idle, jump. You can play them individually, combine them, or play all at once. Each animation becomes a separate <strong>clipAction</strong> on the mixer.</p>
+    <div class="analogy">Like a playlist. Each animation is a track &mdash; you can solo one, mute others, or play them all together.</div>
+  </div>
+  <div class="two">
+    <div>
+      <div class="code-head">
+        <span class="code-label">Bonus 2 &mdash; Multiple Animations</span>
+        <div><button class="cbtn" onclick="copyEl('code-b2')">Copy</button></div>
+      </div>
+      <pre><code id="code-b2"><span class="cm">// Store all actions</span>
+<span class="kw">const</span> actions = [];
+
+<span class="cm">// Create an action for EACH animation</span>
+gltf.animations.forEach(<span class="kw">function</span>(clip) {
+  <span class="kw">const</span> action = mixer.clipAction(clip);
+  actions.push({
+    name: clip.name,
+    action: action,
+    playing: <span class="nm">false</span>
+  });
+});
+
+<span class="cm">// Toggle a single animation on/off</span>
+<span class="kw">function</span> toggleAnim(index) {
+  <span class="kw">const</span> a = actions[index];
+  <span class="kw">if</span> (a.playing) {
+    a.action.stop();
+    a.playing = <span class="nm">false</span>;
+  } <span class="kw">else</span> {
+    a.action.play();
+    a.playing = <span class="nm">true</span>;
+  }
+}
+
+<span class="cm">// Play all at once</span>
+<span class="kw">function</span> playAll() {
+  actions.forEach(<span class="kw">function</span>(a) {
+    a.action.play();
+    a.playing = <span class="nm">true</span>;
+  });
+}
+
+<span class="cm">// Stop all</span>
+<span class="kw">function</span> stopAll() {
+  actions.forEach(<span class="kw">function</span>(a) {
+    a.action.stop();
+    a.playing = <span class="nm">false</span>;
+  });
+}</code></pre>
+    </div>
+    <div class="canvas-side">
+      <div class="cbox"><canvas id="cb2"></canvas><span class="clabel">Live &mdash; Multi-Animation</span>
+        <div class="pick-overlay"><input type="file" id="pickB2" accept=".glb,.gltf"></div>
+        <div class="canvas-panel" id="ctrlsB2">
+          <h4>Animations</h4>
+          <div class="anim-btn-row">
+            <button class="anim-btn" id="b2-playall">Play All</button>
+            <button class="anim-btn" id="b2-stopall">Stop All</button>
+          </div>
+          <div class="anim-list" id="b2-list">
+            <div class="no-anims">No animations found</div>
+          </div>
+        </div>
+      </div>
+      <div class="status-bar" id="statusB2">Load a .glb &mdash; animations appear as checkboxes</div>
+      <p class="cnote">Each animation gets a checkbox inside the canvas. Tick to play, untick to stop.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ══ DOWNLOAD 2: WITH BONUS ══ -->
+<div class="dl-section" id="download">
+  <div class="dl-card" style="background:linear-gradient(135deg,rgba(249,115,22,0.08),rgba(56,189,248,0.06));border-color:rgba(249,115,22,0.2)">
+    <h2>Download &mdash; With Animation Controls</h2>
+    <p>Everything from above plus play/pause, speed control, and multi-animation checkboxes built into the UI.</p>
+    <button class="dl-btn" id="dl-btn-bonus" style="background:var(--accent3);border-color:var(--accent3)">Download HTML</button>
+    <button class="dl-btn sec" id="dl-copy-bonus" style="color:var(--accent3)">Copy Code</button>
+  </div>
+</div>
+
+<footer>Built for CCT University of Galway &middot; Immersive Environments Module</footer>
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+/* ═══ COPY HELPER ═══ */
+function copyEl(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var txt = el.innerText || el.textContent;
+  navigator.clipboard.writeText(txt).then(function() {
+    var btns = document.querySelectorAll('.cbtn');
+    btns.forEach(function(b) {
+      if (b.classList.contains('ok')) { b.classList.remove('ok'); b.textContent = b.dataset.orig || 'Copy'; }
+    });
+    var parent = el.closest('.two') || el.closest('.tmpl-card') || el.parentElement;
+    var clicked = parent ? parent.querySelector('[onclick*="' + id + '"]') : null;
+    if (clicked) { clicked.dataset.orig = clicked.textContent; clicked.textContent = 'Copied!'; clicked.classList.add('ok'); }
+  });
+}
+window.copyEl = copyEl;
+
+/* ═══ DEMO HELPER ═══ */
+function mkDemo(canvasId, camX, camY, camZ) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  var w = canvas.clientWidth || 400;
+  var h = canvas.clientHeight || 350;
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a2e);
+  var camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
+  camera.position.set(camX || 0, camY || 2, camZ || 5);
+  camera.lookAt(0, 0, 0);
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h, false);
+  return { canvas: canvas, scene: scene, camera: camera, renderer: renderer };
+}
+
+/* ═══ SYNC VAR ═══ */
+function syncVar(name, value) {
+  var els = document.querySelectorAll('[data-var="' + name + '"]');
+  els.forEach(function(el) { el.textContent = value; });
+}
+
+/* ═══ INTERSECTION OBSERVER ═══ */
+var visible = {};
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { visible[e.target.id] = e.isIntersecting; });
+}, { rootMargin: '200px' });
+
+/* ═══ CHAPTER REGISTRY ═══ */
+var ch = {};
+
+/* ═══ SHARED: add lights to a scene ═══ */
+function addLights(scene) {
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  var sun = new THREE.DirectionalLight(0xffffff, 0.9);
+  sun.position.set(5, 5, 5);
+  scene.add(sun);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.3);
+  fill.position.set(-3, 2, -3);
+  scene.add(fill);
+  return sun;
+}
+
+/* ═══ SHARED: add box mesh ═══ */
+function addBox(scene) {
+  var mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshPhysicalMaterial({ color: 0x8b5cf6, metalness: 0.3, roughness: 0.5 })
+  );
+  scene.add(mesh);
+  return mesh;
+}
+
+/* ═══ SHARED: load GLB into scene ═══ */
+function loadGLB(file, scene, callback) {
+  var reader = new FileReader();
+  reader.onload = function() {
+    var loader = new GLTFLoader();
+    loader.parse(reader.result, '', function(gltf) {
+      callback(gltf);
+    }, function(err) {
+      console.error('GLB parse error:', err);
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
+/* ═══════════════════════════════════ */
+/* ═══ CHAPTER 1: RECAP ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('c1', 0, 3, 6);
+  if (!d) return;
+  addLights(d.scene);
+
+  // Ground plane (like Week 7 bonus scene)
+  var ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshStandardMaterial({ color: 0x2a2a3e, roughness: 0.9 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  d.scene.add(ground);
+
+  // Multiple objects like the Week 7 scene editor output
+  var shapes = [
+    { geo: new THREE.BoxGeometry(1, 1, 1), col: 0x8b5cf6, x: -1.5, y: 0.5, z: 0 },
+    { geo: new THREE.SphereGeometry(0.7, 32, 32), col: 0x38bdf8, x: 1.5, y: 0.7, z: -1 },
+    { geo: new THREE.TorusKnotGeometry(0.4, 0.15, 100, 16), col: 0xf97316, x: 0, y: 0.6, z: 1.5 }
+  ];
+  var meshes = shapes.map(function(s) {
+    var m = new THREE.Mesh(s.geo, new THREE.MeshPhysicalMaterial({ color: s.col, metalness: 0.3, roughness: 0.5 }));
+    m.position.set(s.x, s.y, s.z);
+    d.scene.add(m);
+    return m;
+  });
+
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  controls.target.set(0, 0.5, 0);
+  observer.observe(d.canvas);
+
+  ch[1] = {};
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    meshes.forEach(function(m) { m.rotation.y += 0.01; });
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ CHAPTER 2: FILE INPUT ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('c2', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('status2');
+  var pickEl = document.getElementById('pick2');
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Selected: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      statusEl.className = 'status-bar ok';
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ CHAPTER 4: LOAD A GLB ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('c4', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('status4');
+  var pickEl = document.getElementById('pick4');
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Loading ' + file.name + '...';
+      statusEl.className = 'status-bar';
+      loadGLB(file, d.scene, function(gltf) {
+        d.scene.add(gltf.scene);
+        statusEl.textContent = 'Model loaded: ' + file.name;
+        statusEl.className = 'status-bar ok';
+      });
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ CHAPTER 5: POSITION ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('c5', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('status5');
+  var pickEl = document.getElementById('pick5');
+  var scaleSlider = document.getElementById('ctrl-scale');
+  var scaleShow = document.getElementById('ctrl-scale-show');
+  var posySlider = document.getElementById('ctrl-posy');
+  var posyShow = document.getElementById('ctrl-posy-show');
+  var currentModel = null;
+
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Loading ' + file.name + '...';
+      statusEl.className = 'status-bar';
+      loadGLB(file, d.scene, function(gltf) {
+        if (currentModel) d.scene.remove(currentModel);
+        var model = gltf.scene;
+
+        // Auto-centre
+        var b3 = new THREE.Box3().setFromObject(model);
+        var center = b3.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        // Apply current slider values
+        var s = parseFloat(scaleSlider.value);
+        model.scale.set(s, s, s);
+        model.position.y = parseFloat(posySlider.value);
+
+        d.scene.add(model);
+        currentModel = model;
+        statusEl.textContent = 'Loaded: ' + file.name + ' -- Use sliders to adjust';
+        statusEl.className = 'status-bar ok';
+      });
+    });
+  }
+
+  if (scaleSlider) {
+    scaleSlider.addEventListener('input', function() {
+      var s = parseFloat(scaleSlider.value);
+      scaleShow.textContent = s.toFixed(1);
+      syncVar('m-scale', s.toFixed(1));
+      if (currentModel) currentModel.scale.set(s, s, s);
+    });
+  }
+  if (posySlider) {
+    posySlider.addEventListener('input', function() {
+      var y = parseFloat(posySlider.value);
+      posyShow.textContent = y.toFixed(1);
+      syncVar('m-posy', y.toFixed(1));
+      if (currentModel) currentModel.position.y = y;
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ CHAPTER 6: ANIMATIONS ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('c6', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('status6');
+  var pickEl = document.getElementById('pick6');
+  var mixer = null;
+  var clock = new THREE.Clock();
+  var currentModel = null;
+
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Loading ' + file.name + '...';
+      statusEl.className = 'status-bar';
+      loadGLB(file, d.scene, function(gltf) {
+        if (currentModel) d.scene.remove(currentModel);
+        if (mixer) { mixer.stopAllAction(); mixer = null; }
+        var model = gltf.scene;
+
+        // Auto-centre
+        var b3 = new THREE.Box3().setFromObject(model);
+        var center = b3.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        d.scene.add(model);
+        currentModel = model;
+
+        // Play animations if they exist
+        if (gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(model);
+          var clip = gltf.animations[0];
+          mixer.clipAction(clip).play();
+          statusEl.textContent = 'Playing animation: ' + (clip.name || 'unnamed') + ' (' + gltf.animations.length + ' found)';
+          statusEl.className = 'status-bar anim';
+        } else {
+          statusEl.textContent = 'Loaded: ' + file.name + ' -- No animations found';
+          statusEl.className = 'status-bar ok';
+        }
+      });
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    var delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ BONUS 1: PLAY/PAUSE ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('cb1', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('statusB1');
+  var pickEl = document.getElementById('pickB1');
+  var ctrlsEl = document.getElementById('ctrlsB1');
+  var mixer = null;
+  var clock = new THREE.Clock();
+  var currentModel = null;
+  var currentAction = null;
+
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Loading ' + file.name + '...';
+      statusEl.className = 'status-bar';
+      loadGLB(file, d.scene, function(gltf) {
+        if (currentModel) d.scene.remove(currentModel);
+        if (mixer) { mixer.stopAllAction(); mixer = null; }
+        currentAction = null;
+
+        var model = gltf.scene;
+        var b3 = new THREE.Box3().setFromObject(model);
+        var center = b3.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        d.scene.add(model);
+        currentModel = model;
+
+        if (gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(model);
+          var clip = gltf.animations[0];
+          currentAction = mixer.clipAction(clip);
+          currentAction.play();
+          ctrlsEl.style.display = 'block';
+          setActiveBtn('b1-play');
+          document.getElementById('b1-speed').value = 1;
+          document.getElementById('b1-speed-show').textContent = '1.0x';
+          statusEl.textContent = 'Playing: ' + (clip.name || 'animation') + ' (' + gltf.animations.length + ' found)';
+          statusEl.className = 'status-bar anim';
+        } else {
+          ctrlsEl.style.display = 'none';
+          statusEl.textContent = 'Loaded: ' + file.name + ' -- No animations';
+          statusEl.className = 'status-bar ok';
+        }
+      });
+    });
+  }
+
+  function setActiveBtn(id) {
+    ['b1-play','b1-pause','b1-stop'].forEach(function(bid) {
+      var el = document.getElementById(bid);
+      if (el) el.className = 'anim-btn' + (bid === id ? ' active' : '');
+    });
+  }
+
+  document.getElementById('b1-play').addEventListener('click', function() {
+    if (!currentAction) return;
+    if (currentAction.paused) currentAction.paused = false;
+    if (!currentAction.isRunning()) currentAction.play();
+    setActiveBtn('b1-play');
+    statusEl.textContent = 'Playing';
+    statusEl.className = 'status-bar anim';
+  });
+
+  document.getElementById('b1-pause').addEventListener('click', function() {
+    if (!currentAction) return;
+    currentAction.paused = true;
+    setActiveBtn('b1-pause');
+    statusEl.textContent = 'Paused';
+    statusEl.className = 'status-bar';
+  });
+
+  document.getElementById('b1-stop').addEventListener('click', function() {
+    if (!currentAction) return;
+    currentAction.stop();
+    setActiveBtn('b1-stop');
+    statusEl.textContent = 'Stopped';
+    statusEl.className = 'status-bar';
+  });
+
+  document.getElementById('b1-speed').addEventListener('input', function() {
+    var v = parseFloat(this.value);
+    document.getElementById('b1-speed-show').textContent = v.toFixed(1) + 'x';
+    if (currentAction) currentAction.timeScale = v;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    var delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ BONUS 2: MULTI-ANIMATION ═══ */
+/* ═══════════════════════════════════ */
+(function() {
+  var d = mkDemo('cb2', 0, 2, 5);
+  if (!d) return;
+  addLights(d.scene);
+  var box = addBox(d.scene);
+  var controls = new OrbitControls(d.camera, d.canvas);
+  controls.enableDamping = true;
+  observer.observe(d.canvas);
+
+  var statusEl = document.getElementById('statusB2');
+  var pickEl = document.getElementById('pickB2');
+  var ctrlsEl = document.getElementById('ctrlsB2');
+  var listEl = document.getElementById('b2-list');
+  var mixer = null;
+  var clock = new THREE.Clock();
+  var currentModel = null;
+  var actions = [];
+
+  function buildList() {
+    listEl.innerHTML = '';
+    if (actions.length === 0) {
+      listEl.innerHTML = '<div class="no-anims">No animations found</div>';
+      return;
+    }
+    actions.forEach(function(a, i) {
+      var item = document.createElement('div');
+      item.className = 'anim-item' + (a.playing ? ' playing' : '');
+      item.id = 'b2-item-' + i;
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = a.playing;
+      cb.id = 'b2-cb-' + i;
+
+      var lbl = document.createElement('label');
+      lbl.htmlFor = 'b2-cb-' + i;
+      lbl.textContent = (a.name || 'Animation ' + (i + 1));
+
+      cb.addEventListener('change', function() {
+        if (cb.checked) {
+          a.action.play();
+          a.playing = true;
+          item.classList.add('playing');
+        } else {
+          a.action.stop();
+          a.playing = false;
+          item.classList.remove('playing');
+        }
+        updateStatus();
+      });
+
+      item.appendChild(cb);
+      item.appendChild(lbl);
+      listEl.appendChild(item);
+    });
+  }
+
+  function updateStatus() {
+    var playing = actions.filter(function(a) { return a.playing; });
+    if (playing.length === 0) {
+      statusEl.textContent = actions.length + ' animations available -- none playing';
+      statusEl.className = 'status-bar';
+    } else {
+      statusEl.textContent = 'Playing ' + playing.length + ' of ' + actions.length + ': ' + playing.map(function(a) { return a.name || '?'; }).join(', ');
+      statusEl.className = 'status-bar anim';
+    }
+  }
+
+  if (pickEl) {
+    pickEl.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Loading ' + file.name + '...';
+      statusEl.className = 'status-bar';
+      loadGLB(file, d.scene, function(gltf) {
+        if (currentModel) d.scene.remove(currentModel);
+        if (mixer) { mixer.stopAllAction(); mixer = null; }
+        actions = [];
+
+        var model = gltf.scene;
+        var b3 = new THREE.Box3().setFromObject(model);
+        var center = b3.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        d.scene.add(model);
+        currentModel = model;
+
+        if (gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(model);
+          gltf.animations.forEach(function(clip) {
+            var action = mixer.clipAction(clip);
+            actions.push({ name: clip.name, action: action, playing: false });
+          });
+          ctrlsEl.style.display = 'block';
+          buildList();
+          // Auto-play first animation
+          actions[0].action.play();
+          actions[0].playing = true;
+          var firstCb = document.getElementById('b2-cb-0');
+          if (firstCb) firstCb.checked = true;
+          var firstItem = document.getElementById('b2-item-0');
+          if (firstItem) firstItem.classList.add('playing');
+          updateStatus();
+        } else {
+          ctrlsEl.style.display = 'none';
+          listEl.innerHTML = '<div class="no-anims">No animations found</div>';
+          statusEl.textContent = 'Loaded: ' + file.name + ' -- No animations';
+          statusEl.className = 'status-bar ok';
+        }
+      });
+    });
+  }
+
+  document.getElementById('b2-playall').addEventListener('click', function() {
+    actions.forEach(function(a, i) {
+      a.action.play();
+      a.playing = true;
+      var cb = document.getElementById('b2-cb-' + i);
+      if (cb) cb.checked = true;
+      var item = document.getElementById('b2-item-' + i);
+      if (item) item.classList.add('playing');
+    });
+    updateStatus();
+  });
+
+  document.getElementById('b2-stopall').addEventListener('click', function() {
+    actions.forEach(function(a, i) {
+      a.action.stop();
+      a.playing = false;
+      var cb = document.getElementById('b2-cb-' + i);
+      if (cb) cb.checked = false;
+      var item = document.getElementById('b2-item-' + i);
+      if (item) item.classList.remove('playing');
+    });
+    updateStatus();
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!visible[d.canvas.id]) return;
+    var delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    box.rotation.y += 0.01;
+    controls.update();
+    d.renderer.render(d.scene, d.camera);
+  }
+  animate();
+})();
+
+
+/* ═══════════════════════════════════ */
+/* ═══ DOWNLOAD BUILDER ═══ */
+/* ═══════════════════════════════════ */
+function buildHTML() {
+  var S = 'scr' + 'ipt';
+  var html = '<!DOCTYPE html>\n'
+    + '<html lang="en">\n<head>\n'
+    + '<meta charset="UTF-8">\n'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+    + '<title>My GLB Scene<\/title>\n'
+    + '<style>\n'
+    + '  * { margin:0; padding:0; box-sizing:border-box; }\n'
+    + '  body { overflow:hidden; background:#000; }\n'
+    + '  canvas { display:block; width:100vw; height:100vh; }\n'
+    + '  #pick { position:fixed; top:10px; left:10px; z-index:10;\n'
+    + '    font-family:monospace; font-size:12px; color:#fff;\n'
+    + '    background:rgba(139,92,246,0.3); border:1px solid rgba(139,92,246,0.5);\n'
+    + '    border-radius:8px; padding:8px 12px; cursor:pointer; }\n'
+    + '  #status { position:fixed; bottom:10px; left:10px; z-index:10;\n'
+    + '    font-family:monospace; font-size:11px; color:#7a7f96;\n'
+    + '    background:rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.1);\n'
+    + '    border-radius:8px; padding:6px 12px; }\n'
+    + '<\/style>\n'
+    + '<\/head>\n<body>\n\n'
+    + '<input type="file" id="pick" accept=".glb,.gltf">\n\n'
+    + '<div id="status">Pick a .glb file to load<\/div>\n\n'
+    + '<canvas id="canvas"><\/canvas>\n\n'
+    + '<' + S + ' type="importmap">\n'
+    + '{\n'
+    + '  "imports": {\n'
+    + '    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n'
+    + '    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"\n'
+    + '  }\n'
+    + '}\n'
+    + '</' + S + '>\n\n'
+    + '<' + S + ' type="module">\n'
+    + '// ============================================\n'
+    + '// MY GLB SCENE - Built with the GLB Journey\n'
+    + '// ============================================\n\n'
+    + '// Imports\n'
+    + 'import * as THREE from \'three\';\n'
+    + 'import { OrbitControls } from \'three/addons/controls/OrbitControls.js\';\n'
+    + 'import { GLTFLoader } from \'three/addons/loaders/GLTFLoader.js\';\n\n'
+    + '// Scene Setup (from Week 7)\n'
+    + 'const canvas = document.getElementById(\'canvas\');\n'
+    + 'const scene = new THREE.Scene();\n'
+    + 'scene.background = new THREE.Color(0x1a1a2e);\n\n'
+    + 'const camera = new THREE.PerspectiveCamera(\n'
+    + '    50, innerWidth / innerHeight, 0.1, 100);\n'
+    + 'camera.position.set(0, 2, 5);\n\n'
+    + 'const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });\n'
+    + 'renderer.setSize(innerWidth, innerHeight);\n'
+    + 'renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\n\n'
+    + '// A Box Mesh (from Week 7)\n'
+    + '// You can remove this once you have your GLB loaded\n'
+    + 'const box = new THREE.Mesh(\n'
+    + '    new THREE.BoxGeometry(1, 1, 1),\n'
+    + '    new THREE.MeshPhysicalMaterial({\n'
+    + '        color: 0x8b5cf6,\n'
+    + '        metalness: 0.3,\n'
+    + '        roughness: 0.5\n'
+    + '    })\n'
+    + ');\n'
+    + 'scene.add(box);\n\n'
+    + '// Lights\n'
+    + 'scene.add(new THREE.AmbientLight(0xffffff, 0.5));\n'
+    + 'const sun = new THREE.DirectionalLight(0xffffff, 0.9);\n'
+    + 'sun.position.set(5, 5, 5);\n'
+    + 'scene.add(sun);\n'
+    + 'const fill = new THREE.DirectionalLight(0xffffff, 0.3);\n'
+    + 'fill.position.set(-3, 2, -3);\n'
+    + 'scene.add(fill);\n\n'
+    + '// Orbit Controls\n'
+    + 'const controls = new OrbitControls(camera, canvas);\n'
+    + 'controls.enableDamping = true;\n\n'
+    + '// GLB Import\n'
+    + 'let mixer;\n'
+    + 'const clock = new THREE.Clock();\n'
+    + 'const statusEl = document.getElementById(\'status\');\n\n'
+    + 'document.getElementById(\'pick\')\n'
+    + '  .addEventListener(\'change\', function(e) {\n'
+    + '    const file = e.target.files[0];\n'
+    + '    if (!file) return;\n'
+    + '    statusEl.textContent = \'Loading \' + file.name + \'...\';\n'
+    + '    const reader = new FileReader();\n'
+    + '    reader.onload = function() {\n'
+    + '      const loader = new GLTFLoader();\n'
+    + '      loader.parse(reader.result, \'\',\n'
+    + '        function(gltf) {\n'
+    + '          const model = gltf.scene;\n'
+    + '          model.scale.set(1, 1, 1);\n'
+    + '          const b = new THREE.Box3().setFromObject(model);\n'
+    + '          const center = b.getCenter(new THREE.Vector3());\n'
+    + '          model.position.sub(center);\n'
+    + '          scene.add(model);\n'
+    + '          if (gltf.animations.length > 0) {\n'
+    + '            mixer = new THREE.AnimationMixer(model);\n'
+    + '            const clip = gltf.animations[0];\n'
+    + '            mixer.clipAction(clip).play();\n'
+    + '            statusEl.textContent = \'Playing: \' + (clip.name || \'animation\');\n'
+    + '          } else {\n'
+    + '            statusEl.textContent = \'Loaded: \' + file.name;\n'
+    + '          }\n'
+    + '        }\n'
+    + '      );\n'
+    + '    };\n'
+    + '    reader.readAsArrayBuffer(file);\n'
+    + '  });\n\n'
+    + '// Animation Loop\n'
+    + 'function animate() {\n'
+    + '    requestAnimationFrame(animate);\n'
+    + '    if (mixer) mixer.update(clock.getDelta());\n'
+    + '    box.rotation.y += 0.01;\n'
+    + '    controls.update();\n'
+    + '    renderer.render(scene, camera);\n'
+    + '}\n'
+    + 'animate();\n\n'
+    + '// Resize Handler\n'
+    + 'window.addEventListener(\'resize\', function() {\n'
+    + '    camera.aspect = innerWidth / innerHeight;\n'
+    + '    camera.updateProjectionMatrix();\n'
+    + '    renderer.setSize(innerWidth, innerHeight);\n'
+    + '});\n'
+    + '</' + S + '>\n'
+    + '<\/body>\n'
+    + '<\/html>';
+  return html;
+}
+
+/* ═══════════════════════════════════ */
+/* ═══ BONUS DOWNLOAD BUILDER  ═══ */
+/* ═══════════════════════════════════ */
+function buildHTMLBonus() {
+  var S = 'scr' + 'ipt';
+  var html = '<!DOCTYPE html>\n'
+    + '<html lang="en">\n<head>\n'
+    + '<meta charset="UTF-8">\n'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+    + '<title>My GLB Scene — With Animation Controls<\/title>\n'
+    + '<style>\n'
+    + '  * { margin:0; padding:0; box-sizing:border-box; }\n'
+    + '  body { overflow:hidden; background:#000; font-family:monospace; }\n'
+    + '  canvas { display:block; width:100vw; height:100vh; }\n'
+    + '  #pick { position:fixed; top:10px; left:10px; z-index:10;\n'
+    + '    font-size:12px; color:#fff;\n'
+    + '    background:rgba(139,92,246,0.3); border:1px solid rgba(139,92,246,0.5);\n'
+    + '    border-radius:8px; padding:8px 12px; cursor:pointer; }\n'
+    + '  #status { position:fixed; bottom:10px; left:10px; z-index:10;\n'
+    + '    font-size:11px; color:#7a7f96;\n'
+    + '    background:rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.1);\n'
+    + '    border-radius:8px; padding:6px 12px; }\n'
+    + '  /* Animation Controls Panel */\n'
+    + '  #panel { position:fixed; top:10px; right:10px; z-index:20;\n'
+    + '    background:rgba(10,10,15,0.9); backdrop-filter:blur(12px);\n'
+    + '    border:1px solid rgba(139,92,246,0.3); border-radius:12px;\n'
+    + '    padding:14px 16px; min-width:220px; display:none; }\n'
+    + '  #panel h3 { font-size:10px; text-transform:uppercase; letter-spacing:1px;\n'
+    + '    color:#a78bfa; margin-bottom:8px; }\n'
+    + '  .btn-row { display:flex; gap:4px; margin-bottom:8px; }\n'
+    + '  .ctrl-btn { padding:4px 10px; font-size:11px; font-family:monospace;\n'
+    + '    background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3);\n'
+    + '    color:#c4b5fd; border-radius:6px; cursor:pointer; }\n'
+    + '  .ctrl-btn:hover { background:rgba(139,92,246,0.3); }\n'
+    + '  .ctrl-btn.active { background:rgba(139,92,246,0.4); color:#fff; }\n'
+    + '  .speed-row { display:flex; align-items:center; gap:6px;\n'
+    + '    font-size:11px; color:#7a7f96; margin-bottom:8px; }\n'
+    + '  .speed-row input { flex:1; accent-color:#8b5cf6; }\n'
+    + '  .speed-val { color:#c4b5fd; min-width:30px; text-align:right; }\n'
+    + '  #anim-list { max-height:200px; overflow-y:auto; }\n'
+    + '  .anim-item { display:flex; align-items:center; gap:6px;\n'
+    + '    padding:3px 6px; font-size:11px; color:#c4b5fd;\n'
+    + '    background:rgba(255,255,255,0.03); border-radius:4px; margin-bottom:2px; }\n'
+    + '  .anim-item input { accent-color:#8b5cf6; }\n'
+    + '<\/style>\n'
+    + '<\/head>\n<body>\n\n'
+    + '<input type="file" id="pick" accept=".glb,.gltf">\n\n'
+    + '<div id="status">Pick a .glb file to load<\/div>\n\n'
+    + '<!-- Animation Controls Panel -->\n'
+    + '<div id="panel">\n'
+    + '  <h3>Animation Controls<\/h3>\n'
+    + '  <div class="btn-row">\n'
+    + '    <button class="ctrl-btn active" id="btn-play">Play<\/button>\n'
+    + '    <button class="ctrl-btn" id="btn-pause">Pause<\/button>\n'
+    + '    <button class="ctrl-btn" id="btn-stop">Stop<\/button>\n'
+    + '  <\/div>\n'
+    + '  <div class="speed-row">\n'
+    + '    <label>Speed<\/label>\n'
+    + '    <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">\n'
+    + '    <span class="speed-val" id="speed-show">1.0x<\/span>\n'
+    + '  <\/div>\n'
+    + '  <div class="btn-row">\n'
+    + '    <button class="ctrl-btn" id="btn-playall">Play All<\/button>\n'
+    + '    <button class="ctrl-btn" id="btn-stopall">Stop All<\/button>\n'
+    + '  <\/div>\n'
+    + '  <div id="anim-list"><\/div>\n'
+    + '<\/div>\n\n'
+    + '<canvas id="canvas"><\/canvas>\n\n'
+    + '<' + S + ' type="importmap">\n'
+    + '{\n'
+    + '  "imports": {\n'
+    + '    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n'
+    + '    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"\n'
+    + '  }\n'
+    + '}\n'
+    + '</' + S + '>\n\n'
+    + '<' + S + ' type="module">\n'
+    + '// ============================================\n'
+    + '// MY GLB SCENE - With Animation Controls\n'
+    + '// Built with the GLB Journey\n'
+    + '// ============================================\n\n'
+    + '// Imports\n'
+    + 'import * as THREE from \'three\';\n'
+    + 'import { OrbitControls } from \'three/addons/controls/OrbitControls.js\';\n'
+    + 'import { GLTFLoader } from \'three/addons/loaders/GLTFLoader.js\';\n\n'
+    + '// Scene Setup\n'
+    + 'const canvas = document.getElementById(\'canvas\');\n'
+    + 'const scene = new THREE.Scene();\n'
+    + 'scene.background = new THREE.Color(0x1a1a2e);\n\n'
+    + 'const camera = new THREE.PerspectiveCamera(\n'
+    + '    50, innerWidth / innerHeight, 0.1, 100);\n'
+    + 'camera.position.set(0, 2, 5);\n\n'
+    + 'const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });\n'
+    + 'renderer.setSize(innerWidth, innerHeight);\n'
+    + 'renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\n\n'
+    + '// Lights\n'
+    + 'scene.add(new THREE.AmbientLight(0xffffff, 0.5));\n'
+    + 'const sun = new THREE.DirectionalLight(0xffffff, 0.9);\n'
+    + 'sun.position.set(5, 5, 5);\n'
+    + 'scene.add(sun);\n'
+    + 'const fill = new THREE.DirectionalLight(0xffffff, 0.3);\n'
+    + 'fill.position.set(-3, 2, -3);\n'
+    + 'scene.add(fill);\n\n'
+    + '// Orbit Controls\n'
+    + 'const controls = new OrbitControls(camera, canvas);\n'
+    + 'controls.enableDamping = true;\n\n'
+    + '// GLB Import + Animation\n'
+    + 'let mixer;\n'
+    + 'let actions = [];  // all animation actions\n'
+    + 'const clock = new THREE.Clock();\n'
+    + 'const statusEl = document.getElementById(\'status\');\n'
+    + 'const panel = document.getElementById(\'panel\');\n'
+    + 'const animList = document.getElementById(\'anim-list\');\n\n'
+    + 'document.getElementById(\'pick\')\n'
+    + '  .addEventListener(\'change\', function(e) {\n'
+    + '    const file = e.target.files[0];\n'
+    + '    if (!file) return;\n'
+    + '    statusEl.textContent = \'Loading \' + file.name + \'...\';\n'
+    + '    const reader = new FileReader();\n'
+    + '    reader.onload = function() {\n'
+    + '      const loader = new GLTFLoader();\n'
+    + '      loader.parse(reader.result, \'\',\n'
+    + '        function(gltf) {\n'
+    + '          // Add model to scene, centered\n'
+    + '          const model = gltf.scene;\n'
+    + '          const b = new THREE.Box3().setFromObject(model);\n'
+    + '          const center = b.getCenter(new THREE.Vector3());\n'
+    + '          model.position.sub(center);\n'
+    + '          scene.add(model);\n\n'
+    + '          // Set up animations\n'
+    + '          if (gltf.animations.length > 0) {\n'
+    + '            mixer = new THREE.AnimationMixer(model);\n'
+    + '            actions = [];\n'
+    + '            gltf.animations.forEach(function(clip) {\n'
+    + '              const action = mixer.clipAction(clip);\n'
+    + '              actions.push({ name: clip.name, action: action, playing: false });\n'
+    + '            });\n\n'
+    + '            // Auto-play first animation\n'
+    + '            actions[0].action.play();\n'
+    + '            actions[0].playing = true;\n\n'
+    + '            // Show control panel and build animation list\n'
+    + '            panel.style.display = \'block\';\n'
+    + '            buildAnimList();\n'
+    + '            statusEl.textContent = actions.length + \' animation(s) found\';\n'
+    + '          } else {\n'
+    + '            statusEl.textContent = \'Loaded (no animations)\';\n'
+    + '          }\n'
+    + '        }\n'
+    + '      );\n'
+    + '    };\n'
+    + '    reader.readAsArrayBuffer(file);\n'
+    + '  });\n\n'
+    + '// Build the animation checkbox list\n'
+    + 'function buildAnimList() {\n'
+    + '  animList.innerHTML = \'\';\n'
+    + '  actions.forEach(function(a, i) {\n'
+    + '    const div = document.createElement(\'div\');\n'
+    + '    div.className = \'anim-item\';\n'
+    + '    const cb = document.createElement(\'input\');\n'
+    + '    cb.type = \'checkbox\';\n'
+    + '    cb.checked = a.playing;\n'
+    + '    cb.addEventListener(\'change\', function() { toggleAnim(i); });\n'
+    + '    const label = document.createElement(\'span\');\n'
+    + '    label.textContent = a.name || \'Animation \' + (i + 1);\n'
+    + '    div.appendChild(cb);\n'
+    + '    div.appendChild(label);\n'
+    + '    animList.appendChild(div);\n'
+    + '  });\n'
+    + '}\n\n'
+    + '// Toggle individual animation\n'
+    + 'function toggleAnim(i) {\n'
+    + '  const a = actions[i];\n'
+    + '  if (a.playing) {\n'
+    + '    a.action.stop();\n'
+    + '    a.playing = false;\n'
+    + '  } else {\n'
+    + '    a.action.play();\n'
+    + '    a.playing = true;\n'
+    + '  }\n'
+    + '  buildAnimList();\n'
+    + '}\n\n'
+    + '// Play / Pause / Stop\n'
+    + 'document.getElementById(\'btn-play\').addEventListener(\'click\', function() {\n'
+    + '  actions.forEach(function(a) {\n'
+    + '    if (a.playing) { a.action.paused = false; }\n'
+    + '  });\n'
+    + '});\n'
+    + 'document.getElementById(\'btn-pause\').addEventListener(\'click\', function() {\n'
+    + '  actions.forEach(function(a) {\n'
+    + '    if (a.playing) { a.action.paused = true; }\n'
+    + '  });\n'
+    + '});\n'
+    + 'document.getElementById(\'btn-stop\').addEventListener(\'click\', function() {\n'
+    + '  actions.forEach(function(a) {\n'
+    + '    a.action.stop(); a.playing = false;\n'
+    + '  });\n'
+    + '  buildAnimList();\n'
+    + '});\n\n'
+    + '// Speed control\n'
+    + 'document.getElementById(\'speed\').addEventListener(\'input\', function(e) {\n'
+    + '  const v = parseFloat(e.target.value);\n'
+    + '  document.getElementById(\'speed-show\').textContent = v.toFixed(1) + \'x\';\n'
+    + '  actions.forEach(function(a) { a.action.timeScale = v; });\n'
+    + '});\n\n'
+    + '// Play All / Stop All\n'
+    + 'document.getElementById(\'btn-playall\').addEventListener(\'click\', function() {\n'
+    + '  actions.forEach(function(a) {\n'
+    + '    a.action.play(); a.playing = true;\n'
+    + '  });\n'
+    + '  buildAnimList();\n'
+    + '});\n'
+    + 'document.getElementById(\'btn-stopall\').addEventListener(\'click\', function() {\n'
+    + '  actions.forEach(function(a) {\n'
+    + '    a.action.stop(); a.playing = false;\n'
+    + '  });\n'
+    + '  buildAnimList();\n'
+    + '});\n\n'
+    + '// Animation Loop\n'
+    + 'function animate() {\n'
+    + '    requestAnimationFrame(animate);\n'
+    + '    if (mixer) mixer.update(clock.getDelta());\n'
+    + '    controls.update();\n'
+    + '    renderer.render(scene, camera);\n'
+    + '}\n'
+    + 'animate();\n\n'
+    + '// Resize Handler\n'
+    + 'window.addEventListener(\'resize\', function() {\n'
+    + '    camera.aspect = innerWidth / innerHeight;\n'
+    + '    camera.updateProjectionMatrix();\n'
+    + '    renderer.setSize(innerWidth, innerHeight);\n'
+    + '});\n'
+    + '</' + S + '>\n'
+    + '<\/body>\n'
+    + '<\/html>';
+  return html;
+}
+
+/* ═══ DOWNLOAD HELPERS ═══ */
+function downloadHTML(html, filename) {
+  var blob = new Blob([html], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function copyHTML(html, btn, label) {
+  navigator.clipboard.writeText(html).then(function() {
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = label; }, 2000);
+  });
+}
+
+/* ═══ BASIC DOWNLOAD (before bonus) ═══ */
+var dlBtnBasic = document.getElementById('dl-btn-basic');
+if (dlBtnBasic) {
+  dlBtnBasic.addEventListener('click', function() {
+    downloadHTML(buildHTML(), 'my-glb-scene.html');
+  });
+}
+var dlCopyBasic = document.getElementById('dl-copy-basic');
+if (dlCopyBasic) {
+  dlCopyBasic.addEventListener('click', function() {
+    copyHTML(buildHTML(), dlCopyBasic, 'Copy Code');
+  });
+}
+
+/* ═══ BONUS DOWNLOAD (with animation controls) ═══ */
+var dlBtnBonus = document.getElementById('dl-btn-bonus');
+if (dlBtnBonus) {
+  dlBtnBonus.addEventListener('click', function() {
+    downloadHTML(buildHTMLBonus(), 'my-glb-scene-animated.html');
+  });
+}
+var dlCopyBonus = document.getElementById('dl-copy-bonus');
+if (dlCopyBonus) {
+  dlCopyBonus.addEventListener('click', function() {
+    copyHTML(buildHTMLBonus(), dlCopyBonus, 'Copy Code');
+  });
+}
+
+</script>
+</body>
+</html>
