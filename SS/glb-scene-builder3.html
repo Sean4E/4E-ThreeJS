@@ -400,6 +400,15 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
             <label>Grid</label>
             <input type="checkbox" id="show-grid" checked>
           </div>
+          <div class="s-row">
+            <label>Ambient color</label>
+            <input type="color" id="ambient-col" value="#ffffff">
+          </div>
+          <div class="s-row">
+            <label>Ambient intensity</label>
+            <input type="range" id="ambient-int" min="0" max="3" step="0.1" value="0.5">
+            <span class="val" id="ambient-show">0.5</span>
+          </div>
         </div>
       </div>
 
@@ -541,27 +550,6 @@ scene.add(sunLight);
 var fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
 fillLight.position.set(-3, 2, -3);
 scene.add(fillLight);
-
-// Register scene lights in hierarchy
-var ambientObj = makeObj('light', 'Ambient Light');
-ambientObj.locked = true; ambientObj.lightType = 'ambient';
-ambientObj.lightColor = '#ffffff'; ambientObj.lightIntensity = 0.5;
-ambientObj.object3d = ambientLight;
-objects.push(ambientObj);
-
-var sunObj = makeObj('light', 'Sun Light');
-sunObj.locked = true; sunObj.lightType = 'directional'; sunObj.lockToSkybox = false;
-sunObj.lightColor = '#ffffff'; sunObj.lightIntensity = 1.0;
-sunObj.object3d = sunLight;
-sunObj.pos = { x: 5, y: 8, z: 5 }; sunObj.initPos = { x: 5, y: 8, z: 5 }; sunObj.baseY = 8;
-objects.push(sunObj);
-
-var fillObj = makeObj('light', 'Fill Light');
-fillObj.locked = true; fillObj.lightType = 'directional'; fillObj.lockToSkybox = false;
-fillObj.lightColor = '#ffffff'; fillObj.lightIntensity = 0.3;
-fillObj.object3d = fillLight;
-fillObj.pos = { x: -3, y: 2, z: -3 }; fillObj.initPos = { x: -3, y: 2, z: -3 }; fillObj.baseY = 2;
-objects.push(fillObj);
 
 // Ground
 var ground = new THREE.Mesh(
@@ -748,7 +736,7 @@ function addGLB(file) {
 /* Shared object factory */
 function makeObj(type, name) {
   return {
-    id: nextId++, type: type, name: name, locked: false,
+    id: nextId++, type: type, name: name,
     geoType: null, color: null, metalness: null, roughness: null,
     lightType: null, lightColor: null, lightIntensity: null, lightDistance: null,
     object3d: null, helper: null,
@@ -775,13 +763,10 @@ function loadSkybox(file) {
 
   function applySkyTex(tex) {
     tex.mapping = THREE.EquirectangularReflectionMapping;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.offset.x = envRotation / 360;
     scene.background = tex;
     scene.environment = tex;
-    // Auto-enable lock-to-skybox on sun + fill
-    sunObj.lockToSkybox = true;
-    fillObj.lockToSkybox = true;
-    applyEnvRotation();
-    if (selectedId === sunObj.id || selectedId === fillObj.id) renderInspector();
   }
 
   if (ext === 'hdr') {
@@ -845,12 +830,11 @@ function renderList() {
     item.className = 'obj-item' + (o.id === selectedId ? ' sel' : '');
 
     var dotClass = o.type === 'primitive' ? 'prim' : o.type === 'glb' ? 'glb-d' : 'light-d';
-    var btns = '<button class="vis-btn' + (o.object3d && !o.object3d.visible ? ' hidden' : '') + '" data-vis="' + o.id + '">\u25C9</button>';
-    if (!o.locked) btns += '<button class="del-btn" data-del="' + o.id + '">\u2715</button>';
     item.innerHTML =
       '<div class="dot ' + dotClass + '"></div>'
       + '<span class="lbl">' + esc(o.name) + '</span>'
-      + btns;
+      + '<button class="vis-btn' + (o.object3d && !o.object3d.visible ? ' hidden' : '') + '" data-vis="' + o.id + '">\u25C9</button>'
+      + '<button class="del-btn" data-del="' + o.id + '">\u2715</button>';
 
     // Click to select
     item.addEventListener('click', function(e) {
@@ -866,24 +850,21 @@ function renderList() {
       renderList();
     });
 
-    // Delete (not available for locked scene lights)
-    var delBtn = item.querySelector('.del-btn');
-    if (delBtn) delBtn.addEventListener('click', function(e) {
+    // Delete
+    item.querySelector('.del-btn').addEventListener('click', function(e) {
       e.stopPropagation();
       removeObj(o.id);
     });
 
     objListEl.appendChild(item);
   });
-  var userCount = objects.filter(function(o) { return !o.locked; }).length;
-  document.getElementById('obj-count').textContent = userCount + ' object' + (userCount !== 1 ? 's' : '');
+  document.getElementById('obj-count').textContent = objects.length + ' object' + (objects.length !== 1 ? 's' : '');
 }
 
 function removeObj(id) {
   var idx = objects.findIndex(function(o) { return o.id === id; });
   if (idx === -1) return;
   var o = objects[idx];
-  if (o.locked) return;
   scene.remove(o.object3d);
   if (o.helper) scene.remove(o.helper);
   if (o.mixer) o.mixer.stopAllAction();
@@ -920,19 +901,15 @@ function renderInspector() {
     + '<div style="font-size:9px;color:var(--text3);text-transform:uppercase">' + o.type + (o.fileSize ? ' \u2014 ' + (o.fileSize / 1024).toFixed(0) + ' KB' : '') + '</div>'
     + '</div>';
 
-  // Transform (skip for ambient lights)
-  if (o.lightType !== 'ambient') {
-    html += '<div class="insp-section">'
-      + '<div class="insp-section-head">Transform</div>'
-      + numRow('px', 'X', o.pos.x, o.initPos.x) + numRow('py', 'Y', o.pos.y, o.initPos.y) + numRow('pz', 'Z', o.pos.z, o.initPos.z);
-    if (o.lightType !== 'directional') {
-      html += '<div style="height:6px"></div>'
-        + numRow('rx', 'Rx', o.rot.x) + numRow('ry', 'Ry', o.rot.y) + numRow('rz', 'Rz', o.rot.z)
-        + '<div style="height:6px"></div>'
-        + numRow('scl', 'S', o.scl);
-    }
-    html += '</div>';
-  }
+  // Transform
+  html += '<div class="insp-section">'
+    + '<div class="insp-section-head">Transform</div>'
+    + numRow('px', 'X', o.pos.x, o.initPos.x) + numRow('py', 'Y', o.pos.y, o.initPos.y) + numRow('pz', 'Z', o.pos.z, o.initPos.z)
+    + '<div style="height:6px"></div>'
+    + numRow('rx', 'Rx', o.rot.x) + numRow('ry', 'Ry', o.rot.y) + numRow('rz', 'Rz', o.rot.z)
+    + '<div style="height:6px"></div>'
+    + numRow('scl', 'S', o.scl)
+    + '</div>';
 
   // Material (primitives)
   if (o.type === 'primitive') {
@@ -949,16 +926,9 @@ function renderInspector() {
     html += '<div class="insp-section">'
       + '<div class="insp-section-head orange">Light</div>'
       + '<div class="prop"><span class="p-label">Col</span><input type="color" value="' + o.lightColor + '" data-lc></div>'
-      + numRow('lint', 'Int', o.lightIntensity);
-    if (o.lightType !== 'ambient' && o.lightType !== 'directional') {
-      html += numRow('ldist', 'Dist', o.lightDistance);
-    }
-    if (o.lightType === 'directional' && o.locked) {
-      html += '<div class="prop" style="margin-top:4px"><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer">'
-        + '<input type="checkbox" data-lock-sky' + (o.lockToSkybox ? ' checked' : '') + '>'
-        + 'Lock to Skybox</label></div>';
-    }
-    html += '</div>';
+      + numRow('lint', 'Int', o.lightIntensity)
+      + numRow('ldist', 'Dist', o.lightDistance)
+      + '</div>';
   }
 
   // Object animation
@@ -1076,18 +1046,6 @@ function wireInspector(o) {
     if (o.helper) { o.helper.color = new THREE.Color(lc.value); o.helper.update(); }
   });
 
-  // Lock to skybox
-  var lsk = inspectorEl.querySelector('[data-lock-sky]');
-  if (lsk) lsk.addEventListener('change', function() {
-    o.lockToSkybox = lsk.checked;
-    if (lsk.checked) {
-      applyEnvRotation();
-    } else {
-      // Reset 3D position to match base pos
-      o.object3d.position.set(o.pos.x, o.pos.y, o.pos.z);
-    }
-  });
-
   // Animation type
   var at = inspectorEl.querySelector('[data-at]');
   if (at) at.addEventListener('change', function() {
@@ -1131,7 +1089,6 @@ function applyProp(o, prop, v) {
   if (prop === 'px') { o.pos.x = v; o.object3d.position.x = v; if (o.helper) { o.helper.position ? o.helper.position.x = v : null; o.helper.update && o.helper.update(); } }
   if (prop === 'py') { o.pos.y = v; o.baseY = v; o.object3d.position.y = v; if (o.helper) { o.helper.position ? o.helper.position.y = v : null; o.helper.update && o.helper.update(); } }
   if (prop === 'pz') { o.pos.z = v; o.object3d.position.z = v; if (o.helper) { o.helper.position ? o.helper.position.z = v : null; o.helper.update && o.helper.update(); } }
-  if ((prop === 'px' || prop === 'pz') && o.lockToSkybox) applyEnvRotation();
   if (prop === 'rx') { o.rot.x = v; o.object3d.rotation.x = v * Math.PI / 180; }
   if (prop === 'ry') { o.rot.y = v; o.object3d.rotation.y = v * Math.PI / 180; }
   if (prop === 'rz') { o.rot.z = v; o.object3d.rotation.z = v * Math.PI / 180; }
@@ -1151,6 +1108,12 @@ document.getElementById('bg-color').addEventListener('input', function(e) {
 });
 document.getElementById('show-ground').addEventListener('change', function(e) { ground.visible = e.target.checked; });
 document.getElementById('show-grid').addEventListener('change', function(e) { grid.visible = e.target.checked; });
+document.getElementById('ambient-col').addEventListener('input', function(e) { ambientLight.color.set(e.target.value); });
+document.getElementById('ambient-int').addEventListener('input', function(e) {
+  ambientLight.intensity = parseFloat(e.target.value);
+  document.getElementById('ambient-show').textContent = parseFloat(e.target.value).toFixed(1);
+});
+
 // Environment intensity (toneMappingExposure)
 document.getElementById('env-intensity').addEventListener('input', function(e) {
   var v = parseFloat(e.target.value);
@@ -1162,20 +1125,15 @@ document.getElementById('env-intensity').addEventListener('input', function(e) {
 document.getElementById('env-rotation').addEventListener('input', function(e) {
   envRotation = parseFloat(e.target.value);
   document.getElementById('env-rot-show').textContent = envRotation + '\u00B0';
-  applyEnvRotation();
+  if (scene.background && scene.background.isTexture) {
+    scene.background.offset.x = envRotation / 360;
+    scene.background.needsUpdate = true;
+  }
+  if (scene.environment && scene.environment.isTexture) {
+    scene.environment.offset.x = envRotation / 360;
+    scene.environment.needsUpdate = true;
+  }
 });
-function applyEnvRotation() {
-  var rad = envRotation * Math.PI / 180;
-  scene.backgroundRotation.set(0, rad, 0);
-  scene.environmentRotation.set(0, rad, 0);
-  // Rotate lights locked to skybox
-  objects.forEach(function(o) {
-    if (!o.lockToSkybox) return;
-    var bx = o.pos.x, bz = o.pos.z;
-    o.object3d.position.x = bx * Math.cos(rad) + bz * Math.sin(rad);
-    o.object3d.position.z = -bx * Math.sin(rad) + bz * Math.cos(rad);
-  });
-}
 
 // Shadows toggle
 document.getElementById('show-shadows').addEventListener('change', function(e) {
@@ -1418,11 +1376,10 @@ document.addEventListener('drop', function(e) {
 /* ═══════════════════════════════════ */
 function updateStatus() {
   var el = document.getElementById('status-text');
-  var userObjs = objects.filter(function(o) { return !o.locked; });
-  if (userObjs.length === 0) { el.textContent = 'Ready'; return; }
-  var p = userObjs.filter(function(o) { return o.type === 'primitive'; }).length;
-  var g = userObjs.filter(function(o) { return o.type === 'glb'; }).length;
-  var l = userObjs.filter(function(o) { return o.type === 'light'; }).length;
+  if (objects.length === 0) { el.textContent = 'Ready'; return; }
+  var p = objects.filter(function(o) { return o.type === 'primitive'; }).length;
+  var g = objects.filter(function(o) { return o.type === 'glb'; }).length;
+  var l = objects.filter(function(o) { return o.type === 'light'; }).length;
   var s = [];
   if (p) s.push(p + ' mesh' + (p > 1 ? 'es' : ''));
   if (g) s.push(g + ' model' + (g > 1 ? 's' : ''));
@@ -1458,18 +1415,8 @@ function buildExport() {
 
   var data = {
     bg: document.getElementById('bg-color').value,
-    ambientColor: ambientObj.lightColor,
-    ambientInt: ambientObj.lightIntensity,
-    sunColor: sunObj.lightColor,
-    sunInt: sunObj.lightIntensity,
-    sunPos: sunObj.lockToSkybox
-      ? { x: +sunLight.position.x.toFixed(2), y: +sunLight.position.y.toFixed(2), z: +sunLight.position.z.toFixed(2) }
-      : sunObj.pos,
-    fillColor: fillObj.lightColor,
-    fillInt: fillObj.lightIntensity,
-    fillPos: fillObj.lockToSkybox
-      ? { x: +fillLight.position.x.toFixed(2), y: +fillLight.position.y.toFixed(2), z: +fillLight.position.z.toFixed(2) }
-      : fillObj.pos,
+    ambientColor: document.getElementById('ambient-col').value,
+    ambientInt: parseFloat(document.getElementById('ambient-int').value),
     showGround: document.getElementById('show-ground').checked,
     showGrid: document.getElementById('show-grid').checked,
     envIntensity: parseFloat(document.getElementById('env-intensity').value),
@@ -1479,7 +1426,7 @@ function buildExport() {
     camTarget: defTarget,
     waypoints: waypoints,
     skybox: null,
-    objects: objects.filter(function(o) { return !o.locked; }).map(function(o) {
+    objects: objects.map(function(o) {
       var d = { type: o.type, name: o.name, pos: o.pos, rot: o.rot, scl: o.scl, animType: o.animType, animSpeed: o.animSpeed, baseY: o.baseY };
       if (o.type === 'primitive') { d.geoType = o.geoType; d.color = o.color; d.metalness = o.metalness; d.roughness = o.roughness; }
       if (o.type === 'light') { d.lightType = o.lightType; d.lightColor = o.lightColor; d.lightIntensity = o.lightIntensity; d.lightDistance = o.lightDistance; }
@@ -1561,14 +1508,12 @@ function buildExport() {
       + '  var blob=new Blob([new Uint8Array(buf)]);\n'
       + '  var url=URL.createObjectURL(blob);\n'
       + '  ' + loaderName + '.load(url,function(tex){\n'
-      + '    tex.mapping=THREE.EquirectangularReflectionMapping;\n';
+      + '    tex.mapping=THREE.EquirectangularReflectionMapping;\n'
+      + '    tex.wrapS=THREE.RepeatWrapping;tex.offset.x=' + (data.envRotation / 360) + ';\n';
     if (data.skybox.type === 'image') {
       html += '    tex.colorSpace=THREE.SRGBColorSpace;\n';
     }
-    var rotRad = (data.envRotation * Math.PI / 180).toFixed(4);
     html += '    scene.background=tex;scene.environment=tex;\n'
-      + '    scene.backgroundRotation.set(0,' + rotRad + ',0);\n'
-      + '    scene.environmentRotation.set(0,' + rotRad + ',0);\n'
       + '    URL.revokeObjectURL(url);\n'
       + '  });\n'
       + '})();\n\n';
@@ -1592,9 +1537,8 @@ function buildExport() {
   html += '\nvar controls=new OrbitControls(camera,canvas);\n'
     + 'controls.enableDamping=true;\n'
     + 'controls.target.set(' + data.camTarget.x + ',' + data.camTarget.y + ',' + data.camTarget.z + ');\n\n'
-    + 'scene.add(new THREE.AmbientLight(\'' + data.ambientColor + '\',' + data.ambientInt + '));\n';
-
-  html += 'var sun=new THREE.DirectionalLight(\'' + data.sunColor + '\',' + data.sunInt + ');sun.position.set(' + data.sunPos.x + ',' + data.sunPos.y + ',' + data.sunPos.z + ');\n';
+    + 'scene.add(new THREE.AmbientLight(\'' + data.ambientColor + '\',' + data.ambientInt + '));\n'
+    + 'var sun=new THREE.DirectionalLight(0xffffff,1);sun.position.set(5,8,5);\n';
 
   if (data.shadows) {
     html += 'sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);\n'
@@ -1605,7 +1549,7 @@ function buildExport() {
   }
 
   html += 'scene.add(sun);\n'
-    + 'var fill=new THREE.DirectionalLight(\'' + data.fillColor + '\',' + data.fillInt + ');fill.position.set(' + data.fillPos.x + ',' + data.fillPos.y + ',' + data.fillPos.z + ');scene.add(fill);\n\n';
+    + 'var fill=new THREE.DirectionalLight(0xffffff,0.3);fill.position.set(-3,2,-3);scene.add(fill);\n\n';
 
   if (data.showGround) {
     html += 'var gnd=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshStandardMaterial({color:0x2a2a3e,roughness:0.9}));\n'
@@ -1761,9 +1705,6 @@ function doCopy() {
 document.getElementById('btn-export').addEventListener('click', doExport);
 document.getElementById('btn-export-tb').addEventListener('click', doExport);
 document.getElementById('btn-copy').addEventListener('click', doCopy);
-
-// Show scene lights in hierarchy on load
-renderList();
 </script>
 </body>
 </html>
