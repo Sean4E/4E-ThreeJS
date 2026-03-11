@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLB Scene Builder</title>
+<style>
+/* ═══ RESET + VARS ═══ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#222233;
+  --border:rgba(139,92,246,0.18);--border2:rgba(139,92,246,0.35);
+  --text:#e2e2f0;--text2:#7a7f96;--accent:#8b5cf6;--accent2:#a78bfa;
+  --accent3:#f97316;--green:#22c55e;--red:#ef4444;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--mono)}
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+/* ═══ LAYOUT ═══ */
+.app{display:flex;height:100vh;width:100vw}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{
+  width:320px;min-width:320px;height:100%;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sidebar-header{
+  padding:16px 18px;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(249,115,22,0.04));
+}
+.sidebar-header h1{
+  font-family:var(--sans);font-size:16px;font-weight:800;
+  background:linear-gradient(135deg,var(--accent2),var(--accent3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.sidebar-header p{font-size:9px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+
+/* Upload zone */
+.upload-zone{
+  margin:12px;padding:20px 14px;
+  border:2px dashed var(--border2);border-radius:12px;
+  text-align:center;cursor:pointer;
+  background:rgba(139,92,246,0.03);
+  transition:all 0.25s;
+}
+.upload-zone:hover,.upload-zone.dragover{
+  border-color:var(--accent);background:rgba(139,92,246,0.08);
+}
+.upload-zone .icon{font-size:28px;margin-bottom:6px;opacity:0.6}
+.upload-zone .label{font-size:11px;color:var(--text2)}
+.upload-zone .label strong{color:var(--accent2)}
+.upload-zone input{display:none}
+
+/* Model list */
+.model-list{flex:1;overflow-y:auto;padding:0 12px 12px}
+.model-list::-webkit-scrollbar{width:4px}
+.model-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.model-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;margin-bottom:8px;overflow:hidden;
+}
+.model-card.selected{border-color:var(--accent)}
+.model-head{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;cursor:pointer;
+}
+.model-head .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.model-head .name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-head .size{font-size:9px;color:var(--text2)}
+.model-head .del{
+  width:20px;height:20px;border-radius:4px;border:none;
+  background:transparent;color:var(--red);font-size:13px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.model-head .del:hover{background:rgba(239,68,68,0.15)}
+
+.model-body{
+  padding:0 10px 10px;display:none;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.model-card.open .model-body{display:block;padding-top:8px}
+
+/* Controls inside model card */
+.ctrl-group{margin-bottom:6px}
+.ctrl-group label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:3px}
+.ctrl-row{display:flex;gap:4px;align-items:center}
+.ctrl-row .axis{font-size:9px;color:var(--accent2);width:10px;text-align:center}
+.ctrl-row input[type=range]{flex:1;accent-color:var(--accent);height:14px}
+.ctrl-row .val{font-size:9px;color:var(--text2);width:36px;text-align:right}
+
+/* Animation section in card */
+.anim-section{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.04)}
+.anim-section h5{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--accent3);margin-bottom:4px}
+.anim-row{display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap}
+.anim-btn{
+  padding:3px 8px;font-size:9px;font-family:var(--mono);
+  background:rgba(139,92,246,0.12);border:1px solid var(--border);
+  color:var(--accent2);border-radius:5px;cursor:pointer;
+}
+.anim-btn:hover{background:rgba(139,92,246,0.25)}
+.anim-btn.active{background:rgba(139,92,246,0.35);color:#fff}
+.anim-item{
+  display:flex;align-items:center;gap:4px;
+  padding:2px 6px;font-size:9px;color:var(--text2);
+  background:rgba(255,255,255,0.02);border-radius:3px;margin-bottom:1px;
+}
+.anim-item input{accent-color:var(--accent)}
+.anim-item span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Scene settings */
+.scene-settings{
+  padding:12px;border-top:1px solid var(--border);
+  background:var(--surface2);
+}
+.scene-settings h4{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px}
+.setting-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.setting-row label{font-size:10px;flex:1}
+.setting-row input[type=color]{
+  width:28px;height:22px;border:1px solid var(--border);
+  border-radius:4px;background:transparent;cursor:pointer;padding:1px;
+}
+.setting-row input[type=range]{width:80px;accent-color:var(--accent)}
+.setting-row .val{font-size:9px;color:var(--text2);width:28px;text-align:right}
+.setting-row input[type=checkbox]{accent-color:var(--accent)}
+
+/* Export section */
+.export-section{
+  padding:12px;border-top:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(249,115,22,0.05),rgba(139,92,246,0.05));
+}
+.export-btn{
+  width:100%;padding:10px;border-radius:8px;border:none;
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+}
+.export-btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent3));
+  color:#fff;margin-bottom:6px;
+}
+.export-btn.primary:hover{opacity:0.85}
+.export-btn.secondary{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--accent2);
+}
+.export-btn.secondary:hover{background:rgba(139,92,246,0.08)}
+.export-info{font-size:8px;color:var(--text2);margin-top:6px;line-height:1.5;text-align:center}
+
+/* ═══ VIEWPORT ═══ */
+.viewport{flex:1;position:relative;background:var(--bg)}
+.viewport canvas{display:block;width:100%;height:100%}
+
+/* Status bar */
+.status-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:center;gap:12px;
+  padding:6px 14px;
+  background:rgba(10,10,15,0.85);backdrop-filter:blur(8px);
+  border-top:1px solid var(--border);
+  font-size:9px;color:var(--text2);
+}
+.status-bar .dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* Drop overlay */
+.drop-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(10,10,15,0.92);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;
+}
+.drop-overlay.visible{display:flex}
+.drop-overlay .big-icon{font-size:64px;opacity:0.5}
+.drop-overlay .big-text{font-size:14px;color:var(--accent2)}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
+  padding:8px 20px;border-radius:8px;font-size:11px;
+  background:rgba(139,92,246,0.9);color:#fff;z-index:200;
+  opacity:0;transition:opacity 0.3s;pointer-events:none;
+}
+.toast.show{opacity:1}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:700px){
+  .sidebar{width:100%;min-width:0;height:50%;border-right:none;border-bottom:1px solid var(--border)}
+  .app{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- Drop overlay for drag & drop anywhere -->
+<div class="drop-overlay" id="drop-overlay">
+  <div class="big-icon">+</div>
+  <div class="big-text">Drop .glb files to add to scene</div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<div class="app">
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>GLB Scene Builder</h1>
+      <p>Upload models / Build scene / Share</p>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="upload-zone">
+      <div class="icon">+</div>
+      <div class="label">Drop <strong>.glb</strong> files here or click to browse</div>
+      <input type="file" id="file-input" accept=".glb,.gltf" multiple>
+    </div>
+
+    <!-- Model list -->
+    <div class="model-list" id="model-list">
+      <!-- Model cards inserted here dynamically -->
+    </div>
+
+    <!-- Scene settings -->
+    <div class="scene-settings">
+      <h4>Scene</h4>
+      <div class="setting-row">
+        <label>Background</label>
+        <input type="color" id="bg-color" value="#1a1a2e">
+      </div>
+      <div class="setting-row">
+        <label>Ground plane</label>
+        <input type="checkbox" id="show-ground" checked>
+      </div>
+      <div class="setting-row">
+        <label>Grid</label>
+        <input type="checkbox" id="show-grid" checked>
+      </div>
+      <div class="setting-row">
+        <label>Ambient</label>
+        <input type="range" id="ambient-int" min="0" max="2" step="0.1" value="0.5">
+        <span class="val" id="ambient-show">0.5</span>
+      </div>
+    </div>
+
+    <!-- Export section -->
+    <div class="export-section">
+      <button class="export-btn primary" id="btn-export">Export Self-Contained HTML</button>
+      <button class="export-btn secondary" id="btn-copy-export">Copy HTML to Clipboard</button>
+      <div class="export-info">
+        All models are embedded as base64.<br>
+        Upload to GitHub Pages or itch.io to share.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEWPORT ═══ -->
+  <div class="viewport" id="viewport">
+    <canvas id="canvas"></canvas>
+    <div class="status-bar">
+      <div class="dot-live"></div>
+      <span id="status-text">Ready &mdash; drop or upload .glb files</span>
+      <span style="margin-left:auto" id="model-count">0 models</span>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+/* ═══════════════════════════════════ */
+/* ═══ STATE                    ═══ */
+/* ═══════════════════════════════════ */
+var models = [];       // { id, name, fileSize, arrayBuffer, object3d, mixer, clips[], actions[], pos{x,y,z}, rot{x,y,z}, scl }
+var nextId = 1;
+var selectedId = null;
+
+/* ═══════════════════════════════════ */
+/* ═══ THREE.JS SCENE           ═══ */
+/* ═══════════════════════════════════ */
+var canvas = document.getElementById('canvas');
+var viewport = document.getElementById('viewport');
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+
+var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
+camera.position.set(3, 3, 5);
+
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+var controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.target.set(0, 0.5, 0);
+
+// Lights
+var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+var sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
+sunLight.position.set(5, 8, 5);
+scene.add(sunLight);
+
+var fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+fillLight.position.set(-3, 2, -3);
+scene.add(fillLight);
+
+// Ground plane
+var groundMat = new THREE.MeshStandardMaterial({ color: 0x2a2a3e, roughness: 0.9 });
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Grid
+var grid = new THREE.GridHelper(20, 20, 0x444466, 0x333355);
+grid.position.y = 0.005;
+scene.add(grid);
+
+// Clock
+var clock = new THREE.Clock();
+
+// Resize
+function resize() {
+  var w = viewport.clientWidth;
+  var h = viewport.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Animate
+function animate() {
+  requestAnimationFrame(animate);
+  var delta = clock.getDelta();
+  models.forEach(function(m) {
+    if (m.mixer) m.mixer.update(delta);
+  });
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ═══════════════════════════════════ */
+/* ═══ GLB LOADING              ═══ */
+/* ═══════════════════════════════════ */
+var loader = new GLTFLoader();
+
+function addModel(file) {
+  var reader = new FileReader();
+  reader.onload = function() {
+    var buffer = reader.result;
+    loader.parse(buffer, '', function(gltf) {
+      var obj = gltf.scene;
+
+      // Center the model
+      var box = new THREE.Box3().setFromObject(obj);
+      var center = box.getCenter(new THREE.Vector3());
+      var size = box.getSize(new THREE.Vector3());
+      obj.position.sub(center);
+      obj.position.y += size.y / 2; // sit on ground
+
+      // Offset so models don't stack
+      var offset = (models.length) * 2;
+      obj.position.x += offset;
+
+      scene.add(obj);
+
+      // Animations
+      var mixer = null;
+      var actions = [];
+      if (gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(obj);
+        gltf.animations.forEach(function(clip) {
+          var action = mixer.clipAction(clip);
+          actions.push({ name: clip.name || 'Unnamed', action: action, playing: false });
+        });
+        // Auto-play first
+        if (actions.length > 0) {
+          actions[0].action.play();
+          actions[0].playing = true;
+        }
+      }
+
+      var modelData = {
+        id: nextId++,
+        name: file.name,
+        fileSize: file.size,
+        arrayBuffer: buffer,
+        object3d: obj,
+        mixer: mixer,
+        clips: gltf.animations,
+        actions: actions,
+        pos: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
+        rot: { x: 0, y: 0, z: 0 },
+        scl: 1.0
+      };
+
+      models.push(modelData);
+      updateUI();
+      selectModel(modelData.id);
+      showToast('Added: ' + file.name);
+      updateStatus();
+    }, function(err) {
+      showToast('Error loading ' + file.name);
+      console.error(err);
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ═══════════════════════════════════ */
+/* ═══ UI RENDERING             ═══ */
+/* ═══════════════════════════════════ */
+var modelListEl = document.getElementById('model-list');
+
+function updateUI() {
+  modelListEl.innerHTML = '';
+  models.forEach(function(m) {
+    var card = document.createElement('div');
+    card.className = 'model-card' + (m.id === selectedId ? ' selected open' : '');
+    card.innerHTML = buildCardHTML(m);
+    modelListEl.appendChild(card);
+    wireCardEvents(card, m);
+  });
+  document.getElementById('model-count').textContent = models.length + ' model' + (models.length !== 1 ? 's' : '');
+}
+
+function buildCardHTML(m) {
+  var sizeKB = (m.fileSize / 1024).toFixed(0) + 'KB';
+  var animCount = m.actions.length;
+  var html = '<div class="model-head">'
+    + '<div class="dot"></div>'
+    + '<span class="name">' + escapeHTML(m.name) + '</span>'
+    + '<span class="size">' + sizeKB + '</span>'
+    + '<button class="del" data-del="' + m.id + '" title="Remove">&times;</button>'
+    + '</div>'
+    + '<div class="model-body">';
+
+  // Position
+  html += '<div class="ctrl-group"><label>Position</label>';
+  html += buildSlider(m.id, 'px', 'X', m.pos.x, -10, 10, 0.1);
+  html += buildSlider(m.id, 'py', 'Y', m.pos.y, -5, 10, 0.1);
+  html += buildSlider(m.id, 'pz', 'Z', m.pos.z, -10, 10, 0.1);
+  html += '</div>';
+
+  // Rotation
+  html += '<div class="ctrl-group"><label>Rotation</label>';
+  html += buildSlider(m.id, 'ry', 'Y', m.rot.y, -180, 180, 1);
+  html += '</div>';
+
+  // Scale
+  html += '<div class="ctrl-group"><label>Scale</label>';
+  html += buildSlider(m.id, 'scl', 'S', m.scl, 0.1, 5, 0.1);
+  html += '</div>';
+
+  // Animations
+  if (animCount > 0) {
+    html += '<div class="anim-section"><h5>Animations (' + animCount + ')</h5>';
+    html += '<div class="anim-row">';
+    html += '<button class="anim-btn" data-playall="' + m.id + '">Play All</button>';
+    html += '<button class="anim-btn" data-stopall="' + m.id + '">Stop All</button>';
+    html += '</div>';
+    // Speed
+    html += '<div class="ctrl-row" style="margin-bottom:4px">'
+      + '<span class="axis">Spd</span>'
+      + '<input type="range" min="0.1" max="3" step="0.1" value="1" data-speed="' + m.id + '">'
+      + '<span class="val" data-speedshow="' + m.id + '">1.0x</span>'
+      + '</div>';
+    // Individual animations
+    m.actions.forEach(function(a, i) {
+      html += '<div class="anim-item">'
+        + '<input type="checkbox" ' + (a.playing ? 'checked' : '') + ' data-animtoggle="' + m.id + '-' + i + '">'
+        + '<span>' + escapeHTML(a.name) + '</span>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function buildSlider(id, prop, axis, value, min, max, step) {
+  return '<div class="ctrl-row">'
+    + '<span class="axis">' + axis + '</span>'
+    + '<input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + value + '" data-slider="' + id + '-' + prop + '">'
+    + '<span class="val" data-slidershow="' + id + '-' + prop + '">' + Number(value).toFixed(1) + '</span>'
+    + '</div>';
+}
+
+function wireCardEvents(card, m) {
+  // Click header to toggle open / select
+  var head = card.querySelector('.model-head');
+  head.addEventListener('click', function(e) {
+    if (e.target.classList.contains('del')) return;
+    selectModel(m.id);
+  });
+
+  // Delete button
+  var delBtn = card.querySelector('[data-del]');
+  delBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    removeModel(m.id);
+  });
+
+  // Position / Rotation / Scale sliders
+  card.querySelectorAll('[data-slider]').forEach(function(input) {
+    input.addEventListener('input', function() {
+      var parts = input.dataset.slider.split('-');
+      var mid = parseInt(parts[0]);
+      var prop = parts[1];
+      var val = parseFloat(input.value);
+      var model = getModel(mid);
+      if (!model) return;
+
+      if (prop === 'px') { model.pos.x = val; model.object3d.position.x = val; }
+      if (prop === 'py') { model.pos.y = val; model.object3d.position.y = val; }
+      if (prop === 'pz') { model.pos.z = val; model.object3d.position.z = val; }
+      if (prop === 'ry') { model.rot.y = val; model.object3d.rotation.y = val * Math.PI / 180; }
+      if (prop === 'scl') { model.scl = val; model.object3d.scale.setScalar(val); }
+
+      var showEl = card.querySelector('[data-slidershow="' + input.dataset.slider + '"]');
+      if (showEl) showEl.textContent = val.toFixed(1);
+    });
+  });
+
+  // Play All / Stop All
+  var playAllBtn = card.querySelector('[data-playall]');
+  if (playAllBtn) {
+    playAllBtn.addEventListener('click', function() {
+      m.actions.forEach(function(a) { a.action.play(); a.playing = true; });
+      updateUI();
+    });
+  }
+  var stopAllBtn = card.querySelector('[data-stopall]');
+  if (stopAllBtn) {
+    stopAllBtn.addEventListener('click', function() {
+      m.actions.forEach(function(a) { a.action.stop(); a.playing = false; });
+      updateUI();
+    });
+  }
+
+  // Speed slider
+  var speedInput = card.querySelector('[data-speed]');
+  if (speedInput) {
+    speedInput.addEventListener('input', function() {
+      var v = parseFloat(speedInput.value);
+      m.actions.forEach(function(a) { a.action.timeScale = v; });
+      var showEl = card.querySelector('[data-speedshow="' + m.id + '"]');
+      if (showEl) showEl.textContent = v.toFixed(1) + 'x';
+    });
+  }
+
+  // Individual animation toggles
+  card.querySelectorAll('[data-animtoggle]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var parts = cb.dataset.animtoggle.split('-');
+      var idx = parseInt(parts[1]);
+      var a = m.actions[idx];
+      if (cb.checked) { a.action.play(); a.playing = true; }
+      else { a.action.stop(); a.playing = false; }
+    });
+  });
+}
+
+function selectModel(id) {
+  selectedId = id;
+  updateUI();
+}
+
+function removeModel(id) {
+  var idx = models.findIndex(function(m) { return m.id === id; });
+  if (idx === -1) return;
+  var m = models[idx];
+  scene.remove(m.object3d);
+  if (m.mixer) m.mixer.stopAllAction();
+  models.splice(idx, 1);
+  if (selectedId === id) selectedId = models.length > 0 ? models[0].id : null;
+  updateUI();
+  updateStatus();
+  showToast('Removed: ' + m.name);
+}
+
+function getModel(id) {
+  return models.find(function(m) { return m.id === id; });
+}
+
+/* ═══════════════════════════════════ */
+/* ═══ SCENE SETTINGS           ═══ */
+/* ═══════════════════════════════════ */
+document.getElementById('bg-color').addEventListener('input', function(e) {
+  scene.background = new THREE.Color(e.target.value);
+});
+
+document.getElementById('show-ground').addEventListener('change', function(e) {
+  ground.visible = e.target.checked;
+});
+
+document.getElementById('show-grid').addEventListener('change', function(e) {
+  grid.visible = e.target.checked;
+});
+
+document.getElementById('ambient-int').addEventListener('input', function(e) {
+  var v = parseFloat(e.target.value);
+  ambientLight.intensity = v;
+  document.getElementById('ambient-show').textContent = v.toFixed(1);
+});
+
+/* ═══════════════════════════════════ */
+/* ═══ FILE INPUT / DRAG & DROP ═══ */
+/* ═══════════════════════════════════ */
+var uploadZone = document.getElementById('upload-zone');
+var fileInput = document.getElementById('file-input');
+var dropOverlay = document.getElementById('drop-overlay');
+
+uploadZone.addEventListener('click', function() { fileInput.click(); });
+
+fileInput.addEventListener('change', function(e) {
+  Array.from(e.target.files).forEach(addModel);
+  fileInput.value = '';
+});
+
+// Drag & drop on upload zone
+uploadZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  uploadZone.classList.add('dragover');
+});
+uploadZone.addEventListener('dragleave', function() {
+  uploadZone.classList.remove('dragover');
+});
+uploadZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  handleDrop(e);
+});
+
+// Drag & drop anywhere on page
+var dragCounter = 0;
+document.addEventListener('dragenter', function(e) {
+  e.preventDefault();
+  dragCounter++;
+  dropOverlay.classList.add('visible');
+});
+document.addEventListener('dragleave', function(e) {
+  e.preventDefault();
+  dragCounter--;
+  if (dragCounter <= 0) { dropOverlay.classList.remove('visible'); dragCounter = 0; }
+});
+document.addEventListener('dragover', function(e) { e.preventDefault(); });
+document.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dragCounter = 0;
+  dropOverlay.classList.remove('visible');
+  handleDrop(e);
+});
+
+function handleDrop(e) {
+  var files = e.dataTransfer ? e.dataTransfer.files : [];
+  Array.from(files).forEach(function(f) {
+    if (f.name.match(/\.(glb|gltf)$/i)) addModel(f);
+  });
+}
+
+/* ═══════════════════════════════════ */
+/* ═══ STATUS + TOAST           ═══ */
+/* ═══════════════════════════════════ */
+function updateStatus() {
+  var statusEl = document.getElementById('status-text');
+  if (models.length === 0) {
+    statusEl.textContent = 'Ready \u2014 drop or upload .glb files';
+  } else {
+    var totalAnims = models.reduce(function(sum, m) { return sum + m.actions.length; }, 0);
+    statusEl.textContent = models.length + ' model(s) loaded \u2014 ' + totalAnims + ' animation(s)';
+  }
+}
+
+var toastTimer;
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+/* ═══════════════════════════════════ */
+/* ═══ EXPORT — SELF-CONTAINED  ═══ */
+/* ═══════════════════════════════════ */
+function arrayBufferToBase64(buffer) {
+  var bytes = new Uint8Array(buffer);
+  var binary = '';
+  var chunkSize = 8192;
+  for (var i = 0; i < bytes.length; i += chunkSize) {
+    var chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
+
+function buildExportHTML() {
+  var S = 'scr' + 'ipt';
+
+  // Build the model data array as a JSON-safe structure
+  var exportModels = models.map(function(m) {
+    return {
+      name: m.name,
+      base64: arrayBufferToBase64(m.arrayBuffer),
+      pos: m.pos,
+      rot: m.rot,
+      scl: m.scl,
+      animPlaying: m.actions.map(function(a) { return a.playing; })
+    };
+  });
+
+  var bgColor = document.getElementById('bg-color').value;
+  var showGround = document.getElementById('show-ground').checked;
+  var showGrid = document.getElementById('show-grid').checked;
+  var ambientVal = parseFloat(document.getElementById('ambient-int').value);
+
+  var dataJSON = JSON.stringify(exportModels);
+
+  var html = '<!DOCTYPE html>\n'
+    + '<html lang="en">\n<head>\n'
+    + '<meta charset="UTF-8">\n'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+    + '<title>My 3D Scene<\/title>\n'
+    + '<style>\n'
+    + '  * { margin:0; padding:0; box-sizing:border-box; }\n'
+    + '  body { overflow:hidden; background:#000; font-family:monospace; }\n'
+    + '  canvas { display:block; width:100vw; height:100vh; }\n'
+    + '  #info { position:fixed; bottom:10px; left:10px; z-index:10;\n'
+    + '    font-size:11px; color:#7a7f96;\n'
+    + '    background:rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.1);\n'
+    + '    border-radius:8px; padding:6px 12px; }\n'
+    + '  /* Animation Controls Panel */\n'
+    + '  #panel { position:fixed; top:10px; right:10px; z-index:20;\n'
+    + '    background:rgba(10,10,15,0.9); backdrop-filter:blur(12px);\n'
+    + '    border:1px solid rgba(139,92,246,0.3); border-radius:12px;\n'
+    + '    padding:14px 16px; min-width:220px; max-height:80vh; overflow-y:auto; }\n'
+    + '  #panel h3 { font-size:10px; text-transform:uppercase; letter-spacing:1px;\n'
+    + '    color:#a78bfa; margin-bottom:8px; }\n'
+    + '  .m-title { font-size:11px; color:#c4b5fd; margin:8px 0 4px;\n'
+    + '    padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); }\n'
+    + '  .m-title:first-of-type { border:none; margin-top:0; }\n'
+    + '  .btn-row { display:flex; gap:4px; margin-bottom:6px; flex-wrap:wrap; }\n'
+    + '  .ctrl-btn { padding:3px 8px; font-size:10px; font-family:monospace;\n'
+    + '    background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3);\n'
+    + '    color:#c4b5fd; border-radius:5px; cursor:pointer; }\n'
+    + '  .ctrl-btn:hover { background:rgba(139,92,246,0.3); }\n'
+    + '  .speed-row { display:flex; align-items:center; gap:6px;\n'
+    + '    font-size:10px; color:#7a7f96; margin-bottom:4px; }\n'
+    + '  .speed-row input { flex:1; accent-color:#8b5cf6; }\n'
+    + '  .speed-val { color:#c4b5fd; min-width:30px; text-align:right; }\n'
+    + '  .anim-item { display:flex; align-items:center; gap:4px;\n'
+    + '    padding:2px 6px; font-size:10px; color:#c4b5fd;\n'
+    + '    background:rgba(255,255,255,0.03); border-radius:3px; margin-bottom:1px; }\n'
+    + '  .anim-item input { accent-color:#8b5cf6; }\n'
+    + '<\/style>\n'
+    + '<\/head>\n<body>\n\n'
+    + '<div id="info">Orbit: drag | Zoom: scroll | Pan: right-drag<\/div>\n\n'
+    + '<div id="panel">\n'
+    + '  <h3>Scene Controls<\/h3>\n'
+    + '  <div id="panel-content"><\/div>\n'
+    + '<\/div>\n\n'
+    + '<canvas id="canvas"><\/canvas>\n\n'
+    + '<' + S + ' type="importmap">\n'
+    + '{\n'
+    + '  "imports": {\n'
+    + '    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n'
+    + '    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"\n'
+    + '  }\n'
+    + '}\n'
+    + '</' + S + '>\n\n'
+    + '<' + S + ' type="module">\n'
+    + '// ============================================\n'
+    + '// MY 3D SCENE - Built with GLB Scene Builder\n'
+    + '// ============================================\n\n'
+    + 'import * as THREE from \'three\';\n'
+    + 'import { OrbitControls } from \'three/addons/controls/OrbitControls.js\';\n'
+    + 'import { GLTFLoader } from \'three/addons/loaders/GLTFLoader.js\';\n\n'
+    + '// Embedded model data\n'
+    + 'var MODEL_DATA = ' + dataJSON + ';\n\n'
+    + '// Decode base64 to ArrayBuffer\n'
+    + 'function b64ToBuffer(b64) {\n'
+    + '  var bin = atob(b64);\n'
+    + '  var bytes = new Uint8Array(bin.length);\n'
+    + '  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);\n'
+    + '  return bytes.buffer;\n'
+    + '}\n\n'
+    + '// Scene\n'
+    + 'var canvas = document.getElementById(\'canvas\');\n'
+    + 'var scene = new THREE.Scene();\n'
+    + 'scene.background = new THREE.Color(\'' + bgColor + '\');\n\n'
+    + 'var camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);\n'
+    + 'camera.position.set(3, 3, 5);\n\n'
+    + 'var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });\n'
+    + 'renderer.setSize(innerWidth, innerHeight);\n'
+    + 'renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\n'
+    + 'renderer.toneMapping = THREE.ACESFilmicToneMapping;\n\n'
+    + 'var controls = new OrbitControls(camera, canvas);\n'
+    + 'controls.enableDamping = true;\n'
+    + 'controls.target.set(0, 0.5, 0);\n\n'
+    + '// Lights\n'
+    + 'scene.add(new THREE.AmbientLight(0xffffff, ' + ambientVal + '));\n'
+    + 'var sun = new THREE.DirectionalLight(0xffffff, 1.0);\n'
+    + 'sun.position.set(5, 8, 5);\n'
+    + 'scene.add(sun);\n'
+    + 'var fill = new THREE.DirectionalLight(0xffffff, 0.3);\n'
+    + 'fill.position.set(-3, 2, -3);\n'
+    + 'scene.add(fill);\n\n';
+
+  // Ground + Grid (conditional)
+  if (showGround) {
+    html += '// Ground\n'
+      + 'var ground = new THREE.Mesh(\n'
+      + '  new THREE.PlaneGeometry(20, 20),\n'
+      + '  new THREE.MeshStandardMaterial({ color: 0x2a2a3e, roughness: 0.9 })\n'
+      + ');\n'
+      + 'ground.rotation.x = -Math.PI / 2;\n'
+      + 'scene.add(ground);\n\n';
+  }
+  if (showGrid) {
+    html += '// Grid\n'
+      + 'var grid = new THREE.GridHelper(20, 20, 0x444466, 0x333355);\n'
+      + 'grid.position.y = 0.005;\n'
+      + 'scene.add(grid);\n\n';
+  }
+
+  html += '// Load embedded models\n'
+    + 'var loader = new GLTFLoader();\n'
+    + 'var clock = new THREE.Clock();\n'
+    + 'var mixers = [];\n'
+    + 'var allActions = []; // { modelIdx, actions[] }\n\n'
+    + 'MODEL_DATA.forEach(function(data, mIdx) {\n'
+    + '  var buffer = b64ToBuffer(data.base64);\n'
+    + '  loader.parse(buffer, \'\', function(gltf) {\n'
+    + '    var obj = gltf.scene;\n'
+    + '    // Center\n'
+    + '    var box = new THREE.Box3().setFromObject(obj);\n'
+    + '    var center = box.getCenter(new THREE.Vector3());\n'
+    + '    var size = box.getSize(new THREE.Vector3());\n'
+    + '    obj.position.sub(center);\n'
+    + '    obj.position.y += size.y / 2;\n'
+    + '    // Apply saved transforms\n'
+    + '    obj.position.set(data.pos.x, data.pos.y, data.pos.z);\n'
+    + '    obj.rotation.y = data.rot.y * Math.PI / 180;\n'
+    + '    obj.scale.setScalar(data.scl);\n'
+    + '    scene.add(obj);\n\n'
+    + '    // Animations\n'
+    + '    if (gltf.animations.length > 0) {\n'
+    + '      var mixer = new THREE.AnimationMixer(obj);\n'
+    + '      mixers.push(mixer);\n'
+    + '      var modelActions = [];\n'
+    + '      gltf.animations.forEach(function(clip, aIdx) {\n'
+    + '        var action = mixer.clipAction(clip);\n'
+    + '        var shouldPlay = data.animPlaying[aIdx] || false;\n'
+    + '        if (shouldPlay) action.play();\n'
+    + '        modelActions.push({ name: clip.name, action: action, playing: shouldPlay });\n'
+    + '      });\n'
+    + '      allActions.push({ modelName: data.name, actions: modelActions });\n'
+    + '      buildPanel();\n'
+    + '    }\n'
+    + '  });\n'
+    + '});\n\n'
+    + '// Build animation control panel\n'
+    + 'function buildPanel() {\n'
+    + '  var el = document.getElementById(\'panel-content\');\n'
+    + '  el.innerHTML = \'\';\n'
+    + '  allActions.forEach(function(ma, mi) {\n'
+    + '    var title = document.createElement(\'div\');\n'
+    + '    title.className = \'m-title\';\n'
+    + '    title.textContent = ma.modelName;\n'
+    + '    el.appendChild(title);\n\n'
+    + '    // Buttons row\n'
+    + '    var row = document.createElement(\'div\');\n'
+    + '    row.className = \'btn-row\';\n'
+    + '    var playAll = document.createElement(\'button\');\n'
+    + '    playAll.className = \'ctrl-btn\'; playAll.textContent = \'Play All\';\n'
+    + '    playAll.addEventListener(\'click\', function() {\n'
+    + '      ma.actions.forEach(function(a) { a.action.play(); a.playing = true; });\n'
+    + '      buildPanel();\n'
+    + '    });\n'
+    + '    var stopAll = document.createElement(\'button\');\n'
+    + '    stopAll.className = \'ctrl-btn\'; stopAll.textContent = \'Stop All\';\n'
+    + '    stopAll.addEventListener(\'click\', function() {\n'
+    + '      ma.actions.forEach(function(a) { a.action.stop(); a.playing = false; });\n'
+    + '      buildPanel();\n'
+    + '    });\n'
+    + '    row.appendChild(playAll); row.appendChild(stopAll);\n'
+    + '    el.appendChild(row);\n\n'
+    + '    // Speed\n'
+    + '    var srow = document.createElement(\'div\');\n'
+    + '    srow.className = \'speed-row\';\n'
+    + '    srow.innerHTML = \'Speed <input type="range" min="0.1" max="3" step="0.1" value="1"> <span class="speed-val">1.0x<\\/span>\';\n'
+    + '    var sinput = srow.querySelector(\'input\');\n'
+    + '    var sshow = srow.querySelector(\'.speed-val\');\n'
+    + '    sinput.addEventListener(\'input\', function() {\n'
+    + '      var v = parseFloat(sinput.value);\n'
+    + '      sshow.textContent = v.toFixed(1) + \'x\';\n'
+    + '      ma.actions.forEach(function(a) { a.action.timeScale = v; });\n'
+    + '    });\n'
+    + '    el.appendChild(srow);\n\n'
+    + '    // Individual anims\n'
+    + '    ma.actions.forEach(function(a, ai) {\n'
+    + '      var item = document.createElement(\'div\');\n'
+    + '      item.className = \'anim-item\';\n'
+    + '      var cb = document.createElement(\'input\');\n'
+    + '      cb.type = \'checkbox\'; cb.checked = a.playing;\n'
+    + '      cb.addEventListener(\'change\', function() {\n'
+    + '        if (cb.checked) { a.action.play(); a.playing = true; }\n'
+    + '        else { a.action.stop(); a.playing = false; }\n'
+    + '      });\n'
+    + '      var span = document.createElement(\'span\');\n'
+    + '      span.textContent = a.name || \'Animation \' + (ai + 1);\n'
+    + '      item.appendChild(cb); item.appendChild(span);\n'
+    + '      el.appendChild(item);\n'
+    + '    });\n'
+    + '  });\n'
+    + '  // Hide panel if no animations\n'
+    + '  document.getElementById(\'panel\').style.display = allActions.length > 0 ? \'block\' : \'none\';\n'
+    + '}\n'
+    + 'buildPanel();\n\n'
+    + '// Animate\n'
+    + 'function animate() {\n'
+    + '  requestAnimationFrame(animate);\n'
+    + '  var delta = clock.getDelta();\n'
+    + '  mixers.forEach(function(m) { m.update(delta); });\n'
+    + '  controls.update();\n'
+    + '  renderer.render(scene, camera);\n'
+    + '}\n'
+    + 'animate();\n\n'
+    + '// Resize\n'
+    + 'window.addEventListener(\'resize\', function() {\n'
+    + '  camera.aspect = innerWidth / innerHeight;\n'
+    + '  camera.updateProjectionMatrix();\n'
+    + '  renderer.setSize(innerWidth, innerHeight);\n'
+    + '});\n'
+    + '</' + S + '>\n'
+    + '<\/body>\n'
+    + '<\/html>';
+
+  return html;
+}
+
+/* ═══ EXPORT BUTTONS ═══ */
+document.getElementById('btn-export').addEventListener('click', function() {
+  if (models.length === 0) { showToast('Add at least one model first'); return; }
+  showToast('Building export...');
+  // Use setTimeout so toast renders before heavy base64 work
+  setTimeout(function() {
+    var html = buildExportHTML();
+    var blob = new Blob([html], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'my-3d-scene.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Exported! Upload to GitHub Pages or itch.io to share.');
+  }, 100);
+});
+
+document.getElementById('btn-copy-export').addEventListener('click', function() {
+  if (models.length === 0) { showToast('Add at least one model first'); return; }
+  var btn = document.getElementById('btn-copy-export');
+  var html = buildExportHTML();
+  navigator.clipboard.writeText(html).then(function() {
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy HTML to Clipboard'; }, 2000);
+  });
+});
+
+/* ═══ UTILS ═══ */
+function escapeHTML(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>
