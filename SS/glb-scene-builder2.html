@@ -18,10 +18,10 @@
   --mono:'Space Mono',monospace;--sans:'Inter',system-ui,sans-serif;
   --radius:6px;
 }
-html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
 
 /* ═══ APP LAYOUT ═══ */
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.app{display:flex;flex-direction:column;height:100vh}
 
 /* ═══ TOOLBAR ═══ */
 .toolbar{
@@ -59,10 +59,8 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
 .panel-left{
   width:220px;min-width:220px;
   background:var(--panel);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;overflow:hidden;
 }
-.panel-left::-webkit-scrollbar{width:3px}
-.panel-left::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
 .panel-section{border-bottom:1px solid var(--border)}
 .panel-section-head{
   display:flex;align-items:center;gap:6px;padding:8px 12px;
@@ -428,11 +426,6 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
             <span class="val" id="env-int-show">1.0</span>
           </div>
           <div class="s-row">
-            <label>Rotation</label>
-            <input type="range" id="env-rotation" min="0" max="360" step="1" value="0">
-            <span class="val" id="env-rot-show">0°</span>
-          </div>
-          <div class="s-row">
             <label>Shadows</label>
             <input type="checkbox" id="show-shadows" checked>
           </div>
@@ -501,7 +494,6 @@ var objects = [];
 var nextId = 1;
 var selectedId = null;
 var skyboxInfo = null; // { type:'image'|'hdr'|'exr', arrayBuffer, dataURL(for images), name }
-var envRotation = 0; // degrees
 var waypoints = []; // { pos:{x,y,z}, target:{x,y,z}, tweenDur:2, holdDur:2 }
 var selectedWP = -1;
 var tourPlaying = false;
@@ -761,17 +753,11 @@ function loadSkybox(file) {
   };
   bufReader.readAsArrayBuffer(file);
 
-  function applySkyTex(tex) {
-    tex.mapping = THREE.EquirectangularReflectionMapping;
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.offset.x = envRotation / 360;
-    scene.background = tex;
-    scene.environment = tex;
-  }
-
   if (ext === 'hdr') {
     rgbeLoader.load(blobURL, function(tex) {
-      applySkyTex(tex);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      scene.background = tex;
+      scene.environment = tex;
       skyboxInfo = { type: 'hdr', arrayBuffer: null, name: file.name };
       updateSkyboxUI(file.name);
       URL.revokeObjectURL(blobURL);
@@ -779,7 +765,9 @@ function loadSkybox(file) {
     });
   } else if (ext === 'exr') {
     exrLoader.load(blobURL, function(tex) {
-      applySkyTex(tex);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      scene.background = tex;
+      scene.environment = tex;
       skyboxInfo = { type: 'exr', arrayBuffer: null, name: file.name };
       updateSkyboxUI(file.name);
       URL.revokeObjectURL(blobURL);
@@ -788,8 +776,10 @@ function loadSkybox(file) {
   } else {
     // jpg, png, webp
     texLoader.load(blobURL, function(tex) {
+      tex.mapping = THREE.EquirectangularReflectionMapping;
       tex.colorSpace = THREE.SRGBColorSpace;
-      applySkyTex(tex);
+      scene.background = tex;
+      scene.environment = tex;
       skyboxInfo = { type: 'image', arrayBuffer: null, name: file.name };
       updateSkyboxUI(file.name, blobURL);
       toast('Skybox loaded');
@@ -1121,20 +1111,6 @@ document.getElementById('env-intensity').addEventListener('input', function(e) {
   document.getElementById('env-int-show').textContent = v.toFixed(1);
 });
 
-// Environment rotation
-document.getElementById('env-rotation').addEventListener('input', function(e) {
-  envRotation = parseFloat(e.target.value);
-  document.getElementById('env-rot-show').textContent = envRotation + '\u00B0';
-  if (scene.background && scene.background.isTexture) {
-    scene.background.offset.x = envRotation / 360;
-    scene.background.needsUpdate = true;
-  }
-  if (scene.environment && scene.environment.isTexture) {
-    scene.environment.offset.x = envRotation / 360;
-    scene.environment.needsUpdate = true;
-  }
-});
-
 // Shadows toggle
 document.getElementById('show-shadows').addEventListener('change', function(e) {
   renderer.shadowMap.enabled = e.target.checked;
@@ -1421,7 +1397,6 @@ function buildExport() {
     showGrid: document.getElementById('show-grid').checked,
     envIntensity: parseFloat(document.getElementById('env-intensity').value),
     shadows: document.getElementById('show-shadows').checked,
-    envRotation: envRotation,
     camPos: defPos,
     camTarget: defTarget,
     waypoints: waypoints,
@@ -1481,7 +1456,7 @@ function buildExport() {
       + '<div id="tour-prog"><\/div>\n';
   }
 
-  html += '\n'
+  html += '\n';
     + '<' + S + ' type="importmap">\n{\n  "imports":{\n'
     + '    "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",\n'
     + '    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"\n'
@@ -1508,8 +1483,7 @@ function buildExport() {
       + '  var blob=new Blob([new Uint8Array(buf)]);\n'
       + '  var url=URL.createObjectURL(blob);\n'
       + '  ' + loaderName + '.load(url,function(tex){\n'
-      + '    tex.mapping=THREE.EquirectangularReflectionMapping;\n'
-      + '    tex.wrapS=THREE.RepeatWrapping;tex.offset.x=' + (data.envRotation / 360) + ';\n';
+      + '    tex.mapping=THREE.EquirectangularReflectionMapping;\n';
     if (data.skybox.type === 'image') {
       html += '    tex.colorSpace=THREE.SRGBColorSpace;\n';
     }
